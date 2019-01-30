@@ -1,0 +1,6 @@
+(executable
+  (name aps))
+
+(ocamllex lexer)
+
+(menhir (modules parser))
