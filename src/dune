@@ -1,6 +1,7 @@
-(executable
-  (name aps))
-
 (ocamllex lexer)
 
 (menhir (modules parser))
+
+(executable
+  (name aps)
+  (flags :standard -w -39))
