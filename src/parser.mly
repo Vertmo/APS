@@ -24,10 +24,10 @@
 %type<Ast.prog> cmds;;
 %type<Ast.cmd> stat;;
 %type<Ast.cmd> dec;;
-%type<Ast.typeE> typeE;;
+%type<Ast.eType> eType;;
 %type<Ast.arg> arg;;
 %type<Ast.arg list> args;;
-%type<Ast.typeE list> typeEs;;
+%type<Ast.eType list> eTypes;;
 %type<Ast.opPrim> opPrim;;
 %type<Ast.expr> expr;;
 %type<Ast.expr list> exprs;;
@@ -46,23 +46,23 @@ cmds:
 stat: ECHO expr { Echo $2 };;
 
 dec:
-  | CONST IDENT typeE expr { ConstDec ($2, $3, $4) }
-  | FUN IDENT typeE LBRACKET args RBRACKET expr { FunDec ($2, $3, $5, $7) }
-  | FUN REC IDENT typeE LBRACKET args RBRACKET expr { RecFunDec ($3, $4, $6, $8) }
+  | CONST IDENT eType expr { ConstDec ($2, $3, $4) }
+  | FUN IDENT eType LBRACKET args RBRACKET expr { FunDec ($2, $3, $5, $7) }
+  | FUN REC IDENT eType LBRACKET args RBRACKET expr { RecFunDec ($3, $4, $6, $8) }
 ;;
 
-typeE:
+eType:
   | INT { Int }
   | BOOL { Bool }
-  | LPAR typeEs ARROW typeE RPAR { Fun ($2, $4) }
+  | LPAR eTypes ARROW eType RPAR { Fun ($2, $4) }
 ;;
 
-typeEs:
-  | typeE { [$1] }
-  | typeE STAR typeEs { $1::$3 }
+eTypes:
+  | eType { [$1] }
+  | eType STAR eTypes { $1::$3 }
 ;;
 
-arg: IDENT PPOINT typeE { ($1, $3) };;
+arg: IDENT PPOINT eType { ($1, $3) };;
 
 args:
   | arg { [$1] }
@@ -77,11 +77,11 @@ opPrim:
 expr:
   | TRUE { Bool(true) } | FALSE { Bool(false) }
   | NUM { IntConst($1) }
-  | IDENT { Var($1) }
+  | IDENT { Sym($1) }
   | LPAR IF expr expr expr RPAR { If($3, $4, $5) }
   | LPAR opPrim exprs RPAR { Op($2, $3) }
-  | LBRACKET args RBRACKET expr { Lambda($2, $4) }
-  | LPAR expr exprs RPAR { Funcall($2, $3) }
+  | LBRACKET args RBRACKET expr { Abs($2, $4) }
+  | LPAR expr exprs RPAR { App($2, $3) }
 ;;
 
 exprs:

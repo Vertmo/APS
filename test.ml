@@ -12,7 +12,7 @@ let testParse f =
 let generateAndTest loc nb =
   let files = generateFileNames loc nb in
   List.iter testParse files;
-  Printf.printf "Tested parse for %s successfully !" loc
+  Printf.printf "Tested parse for %s successfully !\n" loc
 
 let _ =
   generateAndTest samplesAPS0loc samplesAPS0nb
