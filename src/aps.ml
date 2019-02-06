@@ -16,8 +16,12 @@ let lex_and_parse ic =
 
 let main filename step =
   let ic = open_in filename in
-  let ast = lex_and_parse ic in
-  if(step = Parse) then (print_endline (Ast.string_of_prog ast))
-  else ()
+  let prog = lex_and_parse ic in
+  if(step = Parse) then (print_endline (Ast.string_of_prog prog))
+  else (
+    Typer.type_check prog;
+    if(step = Type) then (print_endline "Type checking OK !")
+    else ()
+  )
 
 let _ = Arg.parse speclist (fun x -> main x !step) usage

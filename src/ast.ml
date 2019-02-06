@@ -42,14 +42,14 @@ let rec string_of_expr = function
 
 let string_of_cmd = function
   | Echo e -> Printf.sprintf "ECHO %s" (string_of_expr e)
-  | ConstDec (s, t, e) -> Printf.sprintf "CONST %s %s %s" s (string_of_type t) (string_of_expr e)
-  | FunDec (s, t, a, e) -> Printf.sprintf "FUN %s %s [%s] %s"
-                             s
+  | ConstDec (x, t, e) -> Printf.sprintf "CONST %s %s %s" x (string_of_type t) (string_of_expr e)
+  | FunDec (x, t, a, e) -> Printf.sprintf "FUN %s %s [%s] %s"
+                             x
                              (string_of_type t)
                              (string_of_args a)
                              (string_of_expr e)
-  | RecFunDec (s, t, a, e) -> Printf.sprintf "FUN REC %s %s [%s] %s"
-                                s
+  | RecFunDec (x, t, a, e) -> Printf.sprintf "FUN REC %s %s [%s] %s"
+                                x
                                 (string_of_type t)
                                 (string_of_args a)
                                 (string_of_expr e)
