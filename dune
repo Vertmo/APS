@@ -1,3 +1,4 @@
 (tests
   (names test)
-  (deps src/aps.exe))
+  (deps src/aps.exe
+        src/typer.pl))

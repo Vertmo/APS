@@ -10,7 +10,7 @@ let testParse f =
   then failwith (Printf.sprintf "Parse failed for file %s" f)
 
 let testType f =
-  if Sys.command (Printf.sprintf "./src/aps.exe -type %s " f) <> 0
+  if Sys.command (Printf.sprintf "./src/aps.exe -type %s > /dev/null " f) <> 0
   then failwith (Printf.sprintf "Typing failed for file %s" f)
 
 let generateAndTest loc nb =

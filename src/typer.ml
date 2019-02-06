@@ -38,7 +38,7 @@ let prolog_of_prog p = Printf.sprintf "[%s]"
 
 let type_check p =
   let ps = prolog_of_prog p in
-  print_endline ps;
+  (* print_endline ps; *)
   if (Sys.command
             (Printf.sprintf
                "gprolog --consult-file ./src/typer.pl --query-goal 'check_type(%s)' --query-goal 'halt' | grep yes > /dev/null"
