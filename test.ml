@@ -17,17 +17,18 @@ let testEval f res =
   let ic = Unix.open_process_in (Printf.sprintf "./src/aps.exe -eval %s" f) in
   try (
     if (input_line ic) <> res
-    then failwith (Printf.sprintf "Typing failed for file %s" f)
-  ) with _ -> failwith (Printf.sprintf "Typing failed for file %s" f)
+    then failwith (Printf.sprintf "Evaluation failed for file %s" f)
+  ) with _ -> failwith (Printf.sprintf "Evaluation failed for file %s" f)
 
 let generateAndTest loc version nb =
   let files = generateFileNames loc version nb in
   List.iter testParse files;
-  Printf.printf "Tested parse for %s successfully !\n" loc;
+  Printf.printf "Tested parse for version %d successfully !\n" version;
   List.iter testType files;
-  Printf.printf "Tested typing for %s successfully !\n" loc;
+  Printf.printf "Tested typing for version %d successfully !\n" version;
   let res = open_in (Printf.sprintf "%s/res%s.txt" loc (string_of_int version)) in
-  List.iter (fun f -> testEval f (input_line res)) files
+  List.iter (fun f -> testEval f (input_line res)) files;
+  Printf.printf "Test evaluation for version %d successfully !\n" version
 
 let _ =
   generateAndTest samplesLoc 0 samplesNb.(0)

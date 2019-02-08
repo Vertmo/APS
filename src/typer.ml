@@ -18,8 +18,10 @@ let rec prolog_of_expr = function
   | Abs (args, body) -> Printf.sprintf "abs([%s], %s)" (prolog_of_args args) (prolog_of_expr body)
   | App (f, exprs) -> Printf.sprintf "app(%s, [%s])" (prolog_of_expr f) (String.concat "," (List.map prolog_of_expr exprs))
 
-let prolog_of_cmd = function
+let prolog_of_stat = function
   | Echo e -> Printf.sprintf "echo(%s)" (prolog_of_expr e)
+
+let prolog_of_dec = function
   | ConstDec (x, t, e) -> Printf.sprintf "const(\"%s\", %s, %s)" x (prolog_of_type t) (prolog_of_expr e)
   | FunDec (x, t, a, e) -> Printf.sprintf "fun(\"%s\", %s, [%s], %s)"
                              x
@@ -31,6 +33,10 @@ let prolog_of_cmd = function
                                 (prolog_of_type t)
                                 (prolog_of_args a)
                                 (prolog_of_expr e)
+
+let prolog_of_cmd = function
+  | Stat s -> prolog_of_stat s
+  | Dec d -> prolog_of_dec d
 
 let prolog_of_prog p = Printf.sprintf "[%s]"
     (String.concat "," (List.map prolog_of_cmd p))

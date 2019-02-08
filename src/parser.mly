@@ -21,9 +21,9 @@
 %token EOF
 
 %start<Ast.prog> prog;;
-%type<Ast.prog> cmds;;
-%type<Ast.cmd> stat;;
-%type<Ast.cmd> dec;;
+%type<Ast.cmd list> cmds;;
+%type<Ast.stat> stat;;
+%type<Ast.dec> dec;;
 %type<Ast.eType> eType;;
 %type<Ast.arg> arg;;
 %type<Ast.arg list> args;;
@@ -38,9 +38,9 @@ prog:
 ;;
 
 cmds:
-  | stat { [$1] }
-  | dec SEMICOL cmds { $1::$3 }
-  | stat SEMICOL cmds { $1::$3 }
+  | stat { [(Stat $1)] }
+  | dec SEMICOL cmds { (Dec $1)::$3 }
+  | stat SEMICOL cmds { (Stat $1)::$3 }
 ;;
 
 stat: ECHO expr { Echo $2 };;

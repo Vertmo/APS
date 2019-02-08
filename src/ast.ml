@@ -23,11 +23,15 @@ type expr =
   | Abs of (arg list * expr)
   | App of (expr * expr list)
 
-type cmd =
+type stat =
   | Echo of expr
+
+type dec =
   | ConstDec of string * eType * expr
   | FunDec of string * eType * arg list * expr
   | RecFunDec of string * eType * arg list * expr
+
+type cmd = Stat of stat | Dec of dec
 
 type prog = cmd list
 
@@ -40,8 +44,10 @@ let rec string_of_expr = function
   | Abs (args, body) -> Printf.sprintf ("[%s] %s") (string_of_args args) (string_of_expr body)
   | App (f, exprs) -> Printf.sprintf "(%s %s)" (string_of_expr f) (String.concat " " (List.map string_of_expr exprs))
 
-let string_of_cmd = function
+let string_of_stat = function
   | Echo e -> Printf.sprintf "ECHO %s" (string_of_expr e)
+
+let string_of_dec = function
   | ConstDec (x, t, e) -> Printf.sprintf "CONST %s %s %s" x (string_of_type t) (string_of_expr e)
   | FunDec (x, t, a, e) -> Printf.sprintf "FUN %s %s [%s] %s"
                              x
@@ -53,5 +59,9 @@ let string_of_cmd = function
                                 (string_of_type t)
                                 (string_of_args a)
                                 (string_of_expr e)
+
+let string_of_cmd = function
+  | Stat s -> string_of_stat s
+  | Dec d -> string_of_dec d
 
 let string_of_prog p = Printf.sprintf "[%s]" (String.concat ";\n" (List.map string_of_cmd p))
