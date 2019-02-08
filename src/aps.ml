@@ -21,7 +21,8 @@ let main filename step =
   else (
     Typer.type_check prog;
     if(step = Type) then (print_endline "Type checking OK !")
-    else ()
+    else (let outFlow = (Eval.eval prog) in
+          Printf.printf "%s\n" (String.concat ";" (List.map string_of_int outFlow)))
   )
 
 let _ = Arg.parse speclist (fun x -> main x !step) usage
