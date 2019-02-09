@@ -46,6 +46,7 @@ let rec eval_expr env e = match e with
 let eval_stat env flow = function
   | Echo e -> (match (eval_expr env e) with IntVal i -> (i::flow)
                                           | _ -> failwith "Should not happen")
+  | _ -> failwith "Stat not yet implemented"
 
 (** Evaluate a declaration *)
 let eval_dec env = function
@@ -57,6 +58,7 @@ let eval_dec env = function
     let rc = RecClosure (fun f ->
         (e, fun args -> (x, f)::(List.combine (fst (List.split a)) args)@env)) in
     (x, rc)::env
+  | _ -> failwith "Dec not yet implemented"
 
 (** Evaluate a single command (either declaration or statement) *)
 let eval_cmd (env, flow) = function

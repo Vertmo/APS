@@ -10,7 +10,10 @@ rule token = parse
   | ';' { SEMICOL } | ':' { PPOINT } | ',' { COMMA } | '*' { STAR } | "->" { ARROW }
   | "CONST" { CONST } | "FUN" { FUN } | "REC" { REC }
   | "ECHO" { ECHO }
-  | "int" { INT } | "bool" { BOOL }
+  | "VAR" { VAR } | "SET" { SET }
+  | "PROC" { PROC } | "CALL" { CALL }
+  | "IF" { IFS } | "WHILE" { WHILE }
+  | "int" { INT } | "bool" { BOOL } | "void" { VOID }
   | "true" { TRUE } | "false" { FALSE }
   | "not" { NOT } | "and" { AND } | "or" { OR }
   | "eq" { EQ } | "lt" { LT }

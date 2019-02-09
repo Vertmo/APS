@@ -3,7 +3,7 @@ open Ast
 exception TypeError
 
 let rec prolog_of_type = function
-  | Int -> "int" | Bool -> "bool"
+  | Int -> "int" | Bool -> "bool" | Void -> "void"
   | Fun (l, t) -> Printf.sprintf "[%s,%s]" (String.concat "," (List.map prolog_of_type l)) (prolog_of_type t)
 
 let prolog_of_args a = (String.concat "," (List.map (fun (s, t) -> Printf.sprintf "\"%s\":%s" s (prolog_of_type t)) a))
@@ -20,6 +20,7 @@ let rec prolog_of_expr = function
 
 let prolog_of_stat = function
   | Echo e -> Printf.sprintf "echo(%s)" (prolog_of_expr e)
+  | _ -> failwith "Stat not yet implemented"
 
 let prolog_of_dec = function
   | ConstDec (x, t, e) -> Printf.sprintf "const(\"%s\", %s, %s)" x (prolog_of_type t) (prolog_of_expr e)
@@ -33,6 +34,7 @@ let prolog_of_dec = function
                                 (prolog_of_type t)
                                 (prolog_of_args a)
                                 (prolog_of_expr e)
+  | _ -> failwith "Dec not yet implemented"
 
 let prolog_of_cmd = function
   | Stat s -> prolog_of_stat s

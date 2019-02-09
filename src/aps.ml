@@ -12,7 +12,7 @@ let speclist = [
 
 let lex_and_parse ic =
   let lexbuf = Lexing.from_channel ic in
-  Parser.prog Lexer.token lexbuf
+  Parser.main Lexer.token lexbuf
 
 let main filename step =
   let ic = open_in filename in

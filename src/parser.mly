@@ -10,7 +10,8 @@
 %token ARROW
 %token CONST FUN REC
 %token ECHO
-%token INT BOOL
+%token VAR SET PROC CALL IFS WHILE
+%token INT BOOL VOID
 %token TRUE FALSE
 %token NOT AND OR
 %token EQ LT
@@ -20,7 +21,8 @@
 %token <string> IDENT
 %token EOF
 
-%start<Ast.prog> prog;;
+%start<Ast.prog> main;;
+%type<Ast.prog> prog;;
 %type<Ast.cmd list> cmds;;
 %type<Ast.stat> stat;;
 %type<Ast.dec> dec;;
@@ -33,9 +35,9 @@
 %type<Ast.expr list> exprs;;
 %%
 
-prog:
-  | LBRACKET cmds RBRACKET EOF { $2 }
-;;
+main: prog EOF { $1 };;
+
+prog: LBRACKET cmds RBRACKET { $2 };;
 
 cmds:
   | stat { [(Stat $1)] }
@@ -43,17 +45,27 @@ cmds:
   | stat SEMICOL cmds { (Stat $1)::$3 }
 ;;
 
-stat: ECHO expr { Echo $2 };;
+stat:
+  | ECHO expr { Echo $2 }
+  | SET IDENT expr { Set ($2, $3) }
+  | IFS expr prog prog { Ifs($2, $3, $4) }
+  | WHILE expr prog { While($2, $3) }
+  | CALL IDENT exprs { Call($2, $3) }
+;;
 
 dec:
   | CONST IDENT eType expr { ConstDec ($2, $3, $4) }
   | FUN IDENT eType LBRACKET args RBRACKET expr { FunDec ($2, $3, $5, $7) }
   | FUN REC IDENT eType LBRACKET args RBRACKET expr { RecFunDec ($3, $4, $6, $8) }
+  | VAR IDENT eType { VarDec ($2, $3) }
+  | PROC IDENT LBRACKET args RBRACKET prog { ProcDec($2, $4, $6) }
+  | PROC REC IDENT LBRACKET args RBRACKET prog { RecProcDec($3, $5, $7) }
 ;;
 
 eType:
   | INT { Int }
   | BOOL { Bool }
+  | VOID { Void }
   | LPAR eTypes ARROW eType RPAR { Fun ($2, $4) }
 ;;
 
