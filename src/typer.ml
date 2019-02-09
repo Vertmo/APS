@@ -18,11 +18,7 @@ let rec prolog_of_expr = function
   | Abs (args, body) -> Printf.sprintf "abs([%s], %s)" (prolog_of_args args) (prolog_of_expr body)
   | App (f, exprs) -> Printf.sprintf "app(%s, [%s])" (prolog_of_expr f) (String.concat "," (List.map prolog_of_expr exprs))
 
-let prolog_of_stat = function
-  | Echo e -> Printf.sprintf "echo(%s)" (prolog_of_expr e)
-  | _ -> failwith "Stat not yet implemented"
-
-let prolog_of_dec = function
+and prolog_of_dec = function
   | ConstDec (x, t, e) -> Printf.sprintf "const(\"%s\", %s, %s)" x (prolog_of_type t) (prolog_of_expr e)
   | FunDec (x, t, a, e) -> Printf.sprintf "fun(\"%s\", %s, [%s], %s)"
                              x
@@ -34,13 +30,22 @@ let prolog_of_dec = function
                                 (prolog_of_type t)
                                 (prolog_of_args a)
                                 (prolog_of_expr e)
-  | _ -> failwith "Dec not yet implemented"
+  | VarDec (x, t) -> Printf.sprintf "var(\"%s\", %s)" x (prolog_of_type t)
+  | ProcDec (x, a, p) -> Printf.sprintf "proc(\"%s\", [%s], %s)" x (prolog_of_args a) (prolog_of_prog p)
+  | RecProcDec (x, a, p) -> Printf.sprintf "recproc(\"%s\", [%s], %s)" x (prolog_of_args a) (prolog_of_prog p)
 
-let prolog_of_cmd = function
+and prolog_of_stat = function
+  | Echo e -> Printf.sprintf "echo(%s)" (prolog_of_expr e)
+  | Set (x, e) -> Printf.sprintf "set(\"%s\", %s)" x (prolog_of_expr e)
+  | Ifs (c, t, e) -> Printf.sprintf "ifs(%s, %s, %s)" (prolog_of_expr c) (prolog_of_prog t) (prolog_of_prog e)
+  | While (c, b) -> Printf.sprintf "while(%s, %s)" (prolog_of_expr c) (prolog_of_prog b)
+  | Call (x, exprs) -> Printf.sprintf "call(\"%s\", [%s])" x (String.concat "," (List.map prolog_of_expr exprs))
+
+and prolog_of_cmd = function
   | Stat s -> prolog_of_stat s
   | Dec d -> prolog_of_dec d
 
-let prolog_of_prog p = Printf.sprintf "[%s]"
+and prolog_of_prog p = Printf.sprintf "[%s]"
     (String.concat "," (List.map prolog_of_cmd p))
 
 

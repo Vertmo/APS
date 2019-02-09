@@ -42,14 +42,8 @@ let rec eval_expr env e = match e with
     | _ -> failwith "Should not happen")
   | Abs (a, e) -> Closure (e, (fun args -> (List.combine (fst (List.split a)) args)@env))
 
-(** Evaluate a statement *)
-let eval_stat env flow = function
-  | Echo e -> (match (eval_expr env e) with IntVal i -> (i::flow)
-                                          | _ -> failwith "Should not happen")
-  | _ -> failwith "Stat not yet implemented"
-
 (** Evaluate a declaration *)
-let eval_dec env = function
+and eval_dec env = function
   | ConstDec (x, _, e) -> let v = eval_expr env e in (x, v)::env
   | FunDec (x, _, a, e) ->
     let c = Closure (e, fun args -> (List.combine (fst (List.split a)) args)@env)
@@ -60,12 +54,18 @@ let eval_dec env = function
     (x, rc)::env
   | _ -> failwith "Dec not yet implemented"
 
+(** Evaluate a statement *)
+and eval_stat env flow = function
+  | Echo e -> (match (eval_expr env e) with IntVal i -> (i::flow)
+                                          | _ -> failwith "Should not happen")
+  | _ -> failwith "Stat not yet implemented"
+
 (** Evaluate a single command (either declaration or statement) *)
-let eval_cmd (env, flow) = function
+and eval_cmd (env, flow) = function
   | Stat s -> (env, eval_stat env flow s)
   | Dec d -> (eval_dec env d, flow)
 
-(** Evaluate the whole program*)
-let eval p =
+(** Evaluate a program *)
+and eval_prog p =
   let (_, outFlow) = List.fold_left eval_cmd ([], []) p in
   List.rev outFlow

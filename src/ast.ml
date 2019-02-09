@@ -23,13 +23,6 @@ type expr =
   | Abs of arg list * expr
   | App of expr * expr list
 
-and stat =
-  | Echo of expr
-  | Set of string * expr
-  | Ifs of expr * prog * prog
-  | While of expr * prog
-  | Call of string * expr list
-
 and dec =
   | ConstDec of string * eType * expr
   | FunDec of string * eType * arg list * expr
@@ -38,7 +31,14 @@ and dec =
   | ProcDec of string * arg list * prog
   | RecProcDec of string * arg list * prog
 
-and cmd = Stat of stat | Dec of dec
+and stat =
+  | Echo of expr
+  | Set of string * expr
+  | Ifs of expr * prog * prog
+  | While of expr * prog
+  | Call of string * expr list
+
+and cmd = Dec of dec | Stat of stat
 
 and prog = cmd list
 
@@ -50,13 +50,6 @@ let rec string_of_expr = function
   | Op (op, exprs) -> Printf.sprintf "(%s %s)" (string_of_opprim op) (String.concat " " (List.map string_of_expr exprs))
   | Abs (args, body) -> Printf.sprintf ("[%s] %s") (string_of_args args) (string_of_expr body)
   | App (f, exprs) -> Printf.sprintf "(%s %s)" (string_of_expr f) (String.concat " " (List.map string_of_expr exprs))
-
-and string_of_stat = function
-  | Echo e -> Printf.sprintf "ECHO %s" (string_of_expr e)
-  | Set (x, e) -> Printf.sprintf "SET %s %s" x (string_of_expr e)
-  | Ifs (c, t, e) -> Printf.sprintf "IF %s\n%s\n%s" (string_of_expr c) (string_of_prog t) (string_of_prog e)
-  | While (c, b) -> Printf.sprintf "WHILE %s\n%s" (string_of_expr c) (string_of_prog b)
-  | Call (p, exprs) -> Printf.sprintf "CALL %s %s" p (String.concat " " (List.map string_of_expr exprs))
 
 and string_of_dec = function
   | ConstDec (x, t, e) -> Printf.sprintf "CONST %s %s %s" x (string_of_type t) (string_of_expr e)
@@ -73,6 +66,13 @@ and string_of_dec = function
   | VarDec (x, t) -> Printf.sprintf "VAR %s %s" x (string_of_type t)
   | ProcDec (x, a, p) -> Printf.sprintf "PROC %s [%s]\n%s" x (string_of_args a) (string_of_prog p)
   | RecProcDec (x, a, p) -> Printf.sprintf "PROC REC %s [%s]\n%s" x (string_of_args a) (string_of_prog p)
+
+and string_of_stat = function
+  | Echo e -> Printf.sprintf "ECHO %s" (string_of_expr e)
+  | Set (x, e) -> Printf.sprintf "SET %s %s" x (string_of_expr e)
+  | Ifs (c, t, e) -> Printf.sprintf "IF %s\n%s\n%s" (string_of_expr c) (string_of_prog t) (string_of_prog e)
+  | While (c, b) -> Printf.sprintf "WHILE %s\n%s" (string_of_expr c) (string_of_prog b)
+  | Call (p, exprs) -> Printf.sprintf "CALL %s %s" p (String.concat " " (List.map string_of_expr exprs))
 
 and string_of_cmd = function
   | Stat s -> string_of_stat s
