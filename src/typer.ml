@@ -32,7 +32,7 @@ and prolog_of_dec = function
                                 (prolog_of_expr e)
   | VarDec (x, t) -> Printf.sprintf "var(\"%s\", %s)" x (prolog_of_type t)
   | ProcDec (x, a, p) -> Printf.sprintf "proc(\"%s\", [%s], %s)" x (prolog_of_args a) (prolog_of_prog p)
-  | RecProcDec (x, a, p) -> Printf.sprintf "recproc(\"%s\", [%s], %s)" x (prolog_of_args a) (prolog_of_prog p)
+  | RecProcDec (x, a, p) -> Printf.sprintf "procrec(\"%s\", [%s], %s)" x (prolog_of_args a) (prolog_of_prog p)
 
 and prolog_of_stat = function
   | Echo e -> Printf.sprintf "echo(%s)" (prolog_of_expr e)

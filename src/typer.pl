@@ -38,10 +38,26 @@ check_dec_type(Env, fun(X, Tout, Args, Body), [X:T|Env]) :-
 check_dec_type(Env, funrec(X, Tout, Args, Body), [X:T|Env]) :-
     append([X:T|Args], Env, NEnv), check_expr_type(NEnv, Body, Tout),
     get_types_of_env(Args, Tin), append(Tin, [Tout], T).
+check_dec_type(Env, var(X, T), [X:T|Env]).
+check_dec_type(Env, proc(X, Args, Body), [X:T|Env]) :-
+    append(Args, Env, NEnv), check_cmds_type(NEnv, Body, _),
+    get_types_of_env(Args, Tin), append(Tin, [void], T).
+check_dec_type(Env, procrec(X, Args, Body), [X:T|Env]) :-
+    append([X:T|Args], Env, NEnv), check_cmds_type(NEnv, Body, _),
+    get_types_of_env(Args, Tin), append(Tin, [void], T).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Check a statement
 check_stat_type(Env, echo(E), void) :- check_expr_type(Env, E, int).
+check_stat_type(Env, set(X, E), void) :-
+    check_in_env(Env, X, T), check_expr_type(Env, E, T).
+check_stat_type(Env, ifs(E, Then, Else), void) :-
+    check_expr_type(Env, E, bool),
+    check_cmds_type(Env, Then, _), check_cmds_type(Env, Else, _).
+check_stat_type(Env, while(E, B), void) :-
+    check_expr_type(Env, E, bool), check_cmds_type(Env, B, _).
+check_stat_type(Env, call(X, Es), void) :-
+    check_in_env(Env, X, Pt), check_app_type(Env, Pt, Es, void).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Check an expression
@@ -53,12 +69,12 @@ check_expr_type(Env, abs(Args, Body), T) :-
 check_expr_type(Env, if(Cond, Then, Else), T) :-
     check_expr_type(Env, Cond, bool),
     check_expr_type(Env, Then, T), check_expr_type(Env, Else, T).
-
-%% Function application
 check_expr_type(Env, app(F, Es), T) :-
-    check_expr_type(Env, F, Ft), check_arg_types(Env, Ft, Es, T).
-check_arg_types(_, [T|[]], [], T).
-%% check_arg_types(_, T, [], T) We could use partial application
-check_arg_types(Env, [Ft|Fts], [E|Es], T) :-
-    check_expr_type(Env, E, Ft), check_arg_types(Env, Fts, Es, T).
+    check_expr_type(Env, F, Ft), check_app_type(Env, Ft, Es, T).
+
+%% Check a function application (by checking passed arguments and return type)
+check_app_type(_, [T|[]], [], T).
+%% check_app_type(_, T, [], T) We could use partial application
+check_app_type(Env, [Ft|Fts], [E|Es], T) :-
+    check_expr_type(Env, E, Ft), check_app_type(Env, Fts, Es, T).
 
