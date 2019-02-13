@@ -12,7 +12,7 @@
   SET (nth xs 1) true;
   SET (nth xs 2) false;
   SET (nth xs 3) true;
-  CALL map [x:bool](not x) xs
+  CALL map [x:bool](not x) xs;
   IF (nth xs 0) [ ECHO 1 ] [ ECHO 0 ];
   IF (nth xs 2) [ ECHO 1 ] [ ECHO 0 ]
 ]

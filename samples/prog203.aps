@@ -13,5 +13,5 @@
   SET (nth (nth xs 2) 2) true;
   SET (nth (nth xs 2) 3) true;
   IF (nth (nth xs 2) 2) [ ECHO 1 ] [ ECHO 0 ];
-  IF (nth (nth xs 1) 2) [ ECHO 1 ] [ ECHO 0 ];
+  IF (nth (nth xs 1) 2) [ ECHO 1 ] [ ECHO 0 ]
 ]

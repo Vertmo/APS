@@ -26,5 +26,5 @@
   ECHO (nth xs 1);
   ECHO (nth xs 2);
   ECHO (nth xs 3);
-  ECHO (nth xs 4);
+  ECHO (nth xs 4)
 ]

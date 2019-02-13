@@ -58,6 +58,7 @@ let eval_op op vals = match op with
   | Sub -> IntVal ((int_of_ival (List.hd vals)) - (int_of_ival (List.hd (List.tl vals))))
   | Mul -> IntVal ((int_of_ival (List.hd vals)) * (int_of_ival (List.hd (List.tl vals))))
   | Div -> IntVal ((int_of_ival (List.hd vals)) / (int_of_ival (List.hd (List.tl vals))))
+  | _ -> failwith "Prim not yet implemented"
 
 (** Evaluate an expression and return a value *)
 let rec eval_expr (env, mem) e = match e with
@@ -103,10 +104,12 @@ and eval_stat (env, mem, outFlow) = function
   | Echo e -> let outFlow = (match (eval_expr (env, mem) e) with IntVal i -> (i::outFlow)
                                                                | _ -> failwith "Should not happen") in
     (mem, outFlow)
-  | Set (s, e) -> (match (lookup_env env s) with
-      | Addr a -> let v = eval_expr (env, mem) e in
-        mem.(a) <- (Some v); (mem, outFlow)
-      | _ -> failwith (Printf.sprintf "%s is not a variable" s))
+  | Set (x, e) -> (match x with
+      | SymLval s -> (match (lookup_env env s) with
+          | Addr a -> let v = eval_expr (env, mem) e in
+            mem.(a) <- (Some v); (mem, outFlow)
+          | _ -> failwith "Should not happen")
+      | _ -> failwith "Lval not yet implemented")
   | Ifs (c, t, e) -> (match (eval_expr (env, mem) c) with
       | IntVal 1 -> let (mem, outFlow) = eval_block (env, mem, outFlow) t in
         ((restrict_mem mem env), outFlow)

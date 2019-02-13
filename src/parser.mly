@@ -11,12 +11,13 @@
 %token CONST FUN REC
 %token ECHO
 %token VAR SET PROC CALL IFS WHILE
-%token INT BOOL VOID
+%token INT BOOL VOID VEC
 %token TRUE FALSE
 %token NOT AND OR
 %token EQ LT
 %token ADD SUB MUL DIV
 %token IF
+%token LEN NTH ALLOC
 %token <int> NUM
 %token <string> IDENT
 %token EOF
@@ -26,6 +27,7 @@
 %type<Ast.cmd list> cmds;;
 %type<Ast.dec> dec;;
 %type<Ast.stat> stat;;
+%type<Ast.lval> lval;;
 %type<Ast.eType> eType;;
 %type<Ast.arg> arg;;
 %type<Ast.arg list> args;;
@@ -56,16 +58,22 @@ dec:
 
 stat:
   | ECHO expr { Echo $2 }
-  | SET IDENT expr { Set ($2, $3) }
+  | SET lval expr { Set ($2, $3) }
   | IFS expr prog prog { Ifs($2, $3, $4) }
   | WHILE expr prog { While($2, $3) }
   | CALL IDENT exprs { Call($2, $3) }
+;;
+
+lval:
+  | IDENT { SymLval($1) }
+  | LPAR NTH lval expr RPAR { Nth($3, $4) }
 ;;
 
 eType:
   | INT { Int }
   | BOOL { Bool }
   | VOID { Void }
+  | LPAR VEC eType RPAR { Vec($3) }
   | LPAR eTypes ARROW eType RPAR { Fun ($2, $4) }
 ;;
 
@@ -84,6 +92,7 @@ args:
 opPrim:
   | ADD { Add } | SUB { Sub } | MUL { Mul } | DIV { Div } | EQ { Eq } | LT { Lt }
   | AND { And } | OR { Or } | NOT { Not }
+  | LEN { Len } | NTH { Nth } | ALLOC { Alloc }
 ;;
 
 expr:

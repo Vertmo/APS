@@ -50,7 +50,7 @@ check_dec_type(Env, procrec(X, Args, Body), [X:T|Env]) :-
 %% Check a statement
 check_stat_type(Env, echo(E), void) :- check_expr_type(Env, E, int).
 check_stat_type(Env, set(X, E), void) :-
-    check_in_env(Env, X, T), check_expr_type(Env, E, T).
+    check_expr_type(Env, X, T), check_expr_type(Env, E, T).
 check_stat_type(Env, ifs(E, Then, Else), void) :-
     check_expr_type(Env, E, bool),
     check_cmds_type(Env, Then, _), check_cmds_type(Env, Else, _).

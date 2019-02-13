@@ -4,6 +4,7 @@ exception TypeError
 
 let rec prolog_of_type = function
   | Int -> "int" | Bool -> "bool" | Void -> "void"
+  | Vec t -> Printf.sprintf "vec(%s)" (prolog_of_type t)
   | Fun (l, t) -> Printf.sprintf "[%s,%s]" (String.concat "," (List.map prolog_of_type l)) (prolog_of_type t)
 
 let prolog_of_args a = (String.concat "," (List.map (fun (s, t) -> Printf.sprintf "\"%s\":%s" s (prolog_of_type t)) a))
@@ -34,9 +35,13 @@ and prolog_of_dec = function
   | ProcDec (x, a, p) -> Printf.sprintf "proc(\"%s\", [%s], %s)" x (prolog_of_args a) (prolog_of_prog p)
   | RecProcDec (x, a, p) -> Printf.sprintf "procrec(\"%s\", [%s], %s)" x (prolog_of_args a) (prolog_of_prog p)
 
+and prolog_of_lval = function
+  | SymLval s -> Printf.sprintf "sym(\"%s\")" s
+  | _ -> failwith "Lval not yet implemented"
+
 and prolog_of_stat = function
   | Echo e -> Printf.sprintf "echo(%s)" (prolog_of_expr e)
-  | Set (x, e) -> Printf.sprintf "set(\"%s\", %s)" x (prolog_of_expr e)
+  | Set (x, e) -> Printf.sprintf "set(%s, %s)" (prolog_of_lval x) (prolog_of_expr e)
   | Ifs (c, t, e) -> Printf.sprintf "ifs(%s, %s, %s)" (prolog_of_expr c) (prolog_of_prog t) (prolog_of_prog e)
   | While (c, b) -> Printf.sprintf "while(%s, %s)" (prolog_of_expr c) (prolog_of_prog b)
   | Call (x, exprs) -> Printf.sprintf "call(\"%s\", [%s])" x (String.concat "," (List.map prolog_of_expr exprs))

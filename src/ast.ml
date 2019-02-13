@@ -1,14 +1,18 @@
-type eType = Int | Bool | Void | Fun of (eType list * eType)
+type eType = Int | Bool | Void
+           | Vec of eType
+           | Fun of (eType list * eType)
 
 let rec string_of_type = function
   | Int -> "int" | Bool -> "bool" | Void -> "void"
+  | Vec t -> Printf.sprintf "vec %s" (string_of_type t)
   | Fun (l, t) -> Printf.sprintf "(%s -> %s)" (String.concat "*" (List.map string_of_type l)) (string_of_type t)
 
-type opPrim = Not | And | Or | Eq | Lt | Add | Sub | Mul | Div
+type opPrim = Not | And | Or | Eq | Lt | Add | Sub | Mul | Div | Len | Nth | Alloc
 
 let string_of_opprim = function | Not -> "not" | And -> "and" | Or -> "or"
                                 | Eq -> "eq" | Lt -> "lt"
                                 | Add -> "add" | Sub -> "sub" | Mul -> "mul" | Div -> "div"
+                                | Len -> "len" | Nth -> "nth" | Alloc -> "alloc"
 
 type arg = (string * eType)
 
@@ -31,9 +35,11 @@ and dec =
   | ProcDec of string * arg list * prog
   | RecProcDec of string * arg list * prog
 
+and lval = SymLval of string | Nth of lval * expr
+
 and stat =
   | Echo of expr
-  | Set of string * expr
+  | Set of lval * expr
   | Ifs of expr * prog * prog
   | While of expr * prog
   | Call of string * expr list
@@ -67,9 +73,13 @@ and string_of_dec = function
   | ProcDec (x, a, p) -> Printf.sprintf "PROC %s [%s]\n%s" x (string_of_args a) (string_of_prog p)
   | RecProcDec (x, a, p) -> Printf.sprintf "PROC REC %s [%s]\n%s" x (string_of_args a) (string_of_prog p)
 
+and string_of_lval = function
+  | SymLval s -> s
+  | Nth (l, e) -> Printf.sprintf "(nth %s %s)" (string_of_lval l) (string_of_expr e)
+
 and string_of_stat = function
   | Echo e -> Printf.sprintf "ECHO %s" (string_of_expr e)
-  | Set (x, e) -> Printf.sprintf "SET %s %s" x (string_of_expr e)
+  | Set (x, e) -> Printf.sprintf "SET %s %s" (string_of_lval x) (string_of_expr e)
   | Ifs (c, t, e) -> Printf.sprintf "IF %s\n%s\n%s" (string_of_expr c) (string_of_prog t) (string_of_prog e)
   | While (c, b) -> Printf.sprintf "WHILE %s\n%s" (string_of_expr c) (string_of_prog b)
   | Call (p, exprs) -> Printf.sprintf "CALL %s %s" p (String.concat " " (List.map string_of_expr exprs))
