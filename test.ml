@@ -1,4 +1,4 @@
-let samplesLoc = "../../samples/" and samplesNb = [|21;21|]
+let samplesLoc = "../../samples/" and samplesNb = [|21;21;8|]
 
 let generateFileNames loc version nb =
   List.init nb (fun i -> let si = (string_of_int i) in
@@ -33,3 +33,4 @@ let generateAndTest loc version nb =
 let _ =
   generateAndTest samplesLoc 0 samplesNb.(0);
   generateAndTest samplesLoc 1 samplesNb.(1);
+  generateAndTest samplesLoc 2 samplesNb.(2);
