@@ -1,5 +1,5 @@
 [
-  PROC map [f:(void -> void), xs:(vec void)] [
+  PROC map [f:(bool -> bool), xs:(vec bool)] [
      VAR i int;
      SET i 0;
      WHILE (lt i (len xs)) [

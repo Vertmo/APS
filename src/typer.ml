@@ -37,7 +37,7 @@ and prolog_of_dec = function
 
 and prolog_of_lval = function
   | SymLval s -> Printf.sprintf "sym(\"%s\")" s
-  | _ -> failwith "Lval not yet implemented"
+  | Nth (l, e) -> Printf.sprintf "app(sym(\"nth\"), [%s,%s])" (prolog_of_lval l) (prolog_of_expr e)
 
 and prolog_of_stat = function
   | Echo e -> Printf.sprintf "echo(%s)" (prolog_of_expr e)
@@ -54,9 +54,9 @@ and prolog_of_prog p = Printf.sprintf "[%s]"
     (String.concat "," (List.map prolog_of_cmd p))
 
 
-let type_check p =
+let type_check p print_prog =
   let ps = prolog_of_prog p in
-  (* print_endline ps; *)
+  if print_prog then (print_endline ps);
   if (Sys.command
             (Printf.sprintf
                "gprolog --consult-file ./src/typer.pl --query-goal 'check_type(%s)' --query-goal 'halt' | grep yes > /dev/null"

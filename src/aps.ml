@@ -19,7 +19,7 @@ let main filename step =
   let prog = lex_and_parse ic in
   if(step = Parse) then (print_endline (Ast.string_of_prog prog))
   else (
-    Typer.type_check prog;
+    Typer.type_check prog (step = Type);
     if(step = Type) then (print_endline "Type checking OK !")
     else (let outFlow = (Eval.eval_prog prog) in
           Printf.printf "%s\n" (String.concat ";" (List.map string_of_int outFlow)))

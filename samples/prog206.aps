@@ -1,5 +1,5 @@
 [
-  FUN REC fold void [f:(void -> void), xs:(vec void), a:void, i:int] (
+  FUN REC fold int [f:(int * int -> int), xs:(vec int), a:int, i:int] (
     if (lt i (len xs)) 
       (f (nth xs i) (fold f xs a (add i 1)))
       a

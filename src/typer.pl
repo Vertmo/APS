@@ -69,6 +69,11 @@ check_expr_type(Env, abs(Args, Body), T) :-
 check_expr_type(Env, if(Cond, Then, Else), T) :-
     check_expr_type(Env, Cond, bool),
     check_expr_type(Env, Then, T), check_expr_type(Env, Else, T).
+check_expr_type(Env, app(sym("alloc"), [E]), vec(_)) :- check_expr_type(Env, E, int).
+check_expr_type(Env, app(sym("nth"), [E1,E2]), T) :-
+    check_expr_type(Env, E1, vec(T)), check_expr_type(Env, E2, int).
+check_expr_type(Env, app(sym("len"), [E]), int) :-
+    check_expr_type(Env, E, vec(_)).
 check_expr_type(Env, app(F, Es), T) :-
     check_expr_type(Env, F, Ft), check_app_type(Env, Ft, Es, T).
 
@@ -78,3 +83,4 @@ check_app_type(_, [T|[]], [], T).
 check_app_type(Env, [Ft|Fts], [E|Es], T) :-
     check_expr_type(Env, E, Ft), check_app_type(Env, Fts, Es, T).
 
+%% TODO: unifier n'importe quel type avec void
