@@ -1,4 +1,4 @@
-let samplesLoc = "../../samples/" and samplesNb = [|21;21;8|]
+let samplesLoc = "../../samples/" and samplesNb = [|21;21;9|]
 
 let generateFileNames loc version nb =
   List.init nb (fun i -> let si = (string_of_int i) in
@@ -28,7 +28,7 @@ let generateAndTest loc version nb =
   Printf.printf "Tested typing for version %d successfully !\n" version;
   let res = open_in (Printf.sprintf "%s/res%s.txt" loc (string_of_int version)) in
   List.iter (fun f -> testEval f (input_line res)) files;
-  Printf.printf "Test evaluation for version %d successfully !\n" version
+  Printf.printf "Tested evaluation for version %d successfully !\n" version
 
 let _ =
   generateAndTest samplesLoc 0 samplesNb.(0);

@@ -7,8 +7,8 @@
   SET (nth xs 4) 5;
   ECHO (nth xs 0); 
   ECHO (nth xs 1); 
-  ECHO (nth xs 2); 
-  ECHO (nth xs 2); 
+  ECHO (nth xs 2);
+  ECHO (nth xs 3);
   ECHO (nth xs 4);
   ECHO (len xs)
 ]
