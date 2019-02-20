@@ -133,6 +133,7 @@ and eval_dec (env, mem) = function
   | RecProcDec (x, a, b) -> let rpc = RecProcClosure (fun p ->
       (b, fun args -> (x, p)::(List.combine (fst (List.split a)) args)@env)) in
     ((x, rpc)::env, mem)
+  | _ -> failwith "Dec not yet implemented"
 
 (** Evaluate an left value *)
 and eval_lval (env, mem) = function
@@ -183,6 +184,7 @@ and eval_stat (env, mem, outFlow) = function
 and eval_cmd (env, mem, outFlow) = function
   | Dec d -> let (env, mem) = eval_dec (env, mem) d in (env, mem, outFlow)
   | Stat s -> let (mem, outFlow) = eval_stat (env, mem, outFlow) s in (env, mem, outFlow)
+  | Ret _ -> failwith "Return not yet implemented"
 
 (** Evaluate a block *)
 and eval_block startState p =

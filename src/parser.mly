@@ -10,7 +10,7 @@
 %token ARROW
 %token CONST FUN REC
 %token ECHO
-%token VAR SET PROC CALL IFS WHILE
+%token VAR SET PROC CALL IFS WHILE RETURN
 %token INT BOOL VOID VEC
 %token TRUE FALSE
 %token NOT AND OR
@@ -28,6 +28,7 @@
 %type<Ast.dec> dec;;
 %type<Ast.stat> stat;;
 %type<Ast.lval> lval;;
+%type<Ast.ret> ret;;
 %type<Ast.eType> eType;;
 %type<Ast.arg> arg;;
 %type<Ast.arg list> args;;
@@ -42,9 +43,10 @@ main: prog EOF { $1 };;
 prog: LBRACKET cmds RBRACKET { $2 };;
 
 cmds:
-  | stat { [(Stat $1)] }
+  | stat { [Stat $1] }
   | dec SEMICOL cmds { (Dec $1)::$3 }
   | stat SEMICOL cmds { (Stat $1)::$3 }
+  | ret { [Ret $1] }
 ;;
 
 dec:
@@ -54,6 +56,8 @@ dec:
   | VAR IDENT eType { VarDec ($2, $3) }
   | PROC IDENT LBRACKET args RBRACKET prog { ProcDec($2, $4, $6) }
   | PROC REC IDENT LBRACKET args RBRACKET prog { RecProcDec($3, $5, $7) }
+  | FUN IDENT eType LBRACKET args RBRACKET LBRACKET cmds RBRACKET { FunProcDec($2, $3, $5, $8) }
+  | FUN REC IDENT eType LBRACKET args RBRACKET LBRACKET cmds RBRACKET { RecFunProcDec($3, $4, $6, $9) }
 ;;
 
 stat:
@@ -63,6 +67,8 @@ stat:
   | WHILE expr prog { While($2, $3) }
   | CALL IDENT exprs { Call($2, $3) }
 ;;
+
+ret: RETURN expr { Return $2 }
 
 lval:
   | IDENT { SymLval($1) }

@@ -34,6 +34,8 @@ and dec =
   | VarDec of string * eType
   | ProcDec of string * arg list * prog
   | RecProcDec of string * arg list * prog
+  | FunProcDec of string * eType * arg list * prog
+  | RecFunProcDec of string * eType * arg list * prog
 
 and lval = SymLval of string | Nth of lval * expr
 
@@ -44,7 +46,9 @@ and stat =
   | While of expr * prog
   | Call of string * expr list
 
-and cmd = Dec of dec | Stat of stat
+and ret = Return of expr
+
+and cmd = Dec of dec | Stat of stat | Ret of ret
 
 and prog = cmd list
 
@@ -72,6 +76,10 @@ and string_of_dec = function
   | VarDec (x, t) -> Printf.sprintf "VAR %s %s" x (string_of_type t)
   | ProcDec (x, a, p) -> Printf.sprintf "PROC %s [%s]\n%s" x (string_of_args a) (string_of_prog p)
   | RecProcDec (x, a, p) -> Printf.sprintf "PROC REC %s [%s]\n%s" x (string_of_args a) (string_of_prog p)
+  | FunProcDec (x, t, a, p) -> Printf.sprintf "FUN %s %s [%s]\n%s"
+                                 x (string_of_type t) (string_of_args a) (string_of_prog p)
+  | RecFunProcDec (x, t, a, p) -> Printf.sprintf "REC FUN %s %s [%s]\n%s"
+                                 x (string_of_type t) (string_of_args a) (string_of_prog p)
 
 and string_of_lval = function
   | SymLval s -> s
@@ -84,8 +92,12 @@ and string_of_stat = function
   | While (c, b) -> Printf.sprintf "WHILE %s\n%s" (string_of_expr c) (string_of_prog b)
   | Call (p, exprs) -> Printf.sprintf "CALL %s %s" p (String.concat " " (List.map string_of_expr exprs))
 
+and string_of_ret = function
+  | Return e -> Printf.sprintf "RETURN %s" (string_of_expr e)
+
 and string_of_cmd = function
   | Stat s -> string_of_stat s
   | Dec d -> string_of_dec d
+  | Ret r -> string_of_ret r
 
 and string_of_prog p = Printf.sprintf "[%s]" (String.concat ";\n" (List.map string_of_cmd p))

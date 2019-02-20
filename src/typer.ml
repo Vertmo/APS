@@ -34,6 +34,7 @@ and prolog_of_dec = function
   | VarDec (x, t) -> Printf.sprintf "var(\"%s\", %s)" x (prolog_of_type t)
   | ProcDec (x, a, p) -> Printf.sprintf "proc(\"%s\", [%s], %s)" x (prolog_of_args a) (prolog_of_prog p)
   | RecProcDec (x, a, p) -> Printf.sprintf "procrec(\"%s\", [%s], %s)" x (prolog_of_args a) (prolog_of_prog p)
+  | _ -> failwith "Dec not yet implemented"
 
 and prolog_of_lval = function
   | SymLval s -> Printf.sprintf "sym(\"%s\")" s
@@ -49,6 +50,7 @@ and prolog_of_stat = function
 and prolog_of_cmd = function
   | Stat s -> prolog_of_stat s
   | Dec d -> prolog_of_dec d
+  | Ret _ -> failwith "Return not yet implemented"
 
 and prolog_of_prog p = Printf.sprintf "[%s]"
     (String.concat "," (List.map prolog_of_cmd p))
