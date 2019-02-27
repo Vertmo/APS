@@ -6,7 +6,7 @@
             ECHO y;
             SET y (add y 1)
       ];
-      RETURN x
+      RETURN y
   ];
   ECHO (f 5)
 ]

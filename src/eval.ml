@@ -8,6 +8,7 @@ and recclosure = value -> closure
 and procclosure = (cmd list * (value list -> env))
 and recprocclosure = value -> procclosure
 and env = (string * value) list
+and valueE = Empty | Value of value
 
 type 'a memspace = None | Any | Some of 'a
 type mem = value memspace array
@@ -16,12 +17,12 @@ type outFlow = int list
 
 exception ArrayIndexOutOfBoundsEx
 
-let int_of_ival = function IntVal i -> i | _ -> failwith "Should not happen"
+let int_of_ival = function IntVal i -> i | _ -> failwith "int_of_ival: Should not happen"
 
 let rec lookup_env env s = match env with
   | (s', v)::_ when s = s' -> v
   | _::q -> lookup_env q s
-  | [] -> failwith "Should not happen"
+  | [] -> failwith "lookup_env: Should not happen"
 
 (* On utilise des tableaux dynamiques pour gérer la mémoire *)
 let rec allocn m n =
@@ -80,20 +81,20 @@ let eval_op op vals mem = match op with
   | Mul -> IntVal ((int_of_ival (List.hd vals)) * (int_of_ival (List.hd (List.tl vals)))), mem
   | Div -> IntVal ((int_of_ival (List.hd vals)) / (int_of_ival (List.hd (List.tl vals)))), mem
   | Len -> (match (List.hd vals) with
-      | Block (_, n) -> IntVal n, mem | _ -> failwith "Should not happen")
+      | Block (_, n) -> IntVal n, mem | _ -> failwith "Len: Should not happen")
   | Nth -> (match ((List.hd vals), (List.hd (List.tl vals))) with
       | (Block (a, n), IntVal i) -> if i >= n || i < 0 then raise ArrayIndexOutOfBoundsEx;
         (match mem.(a+i) with
          | Some v -> v, mem
          | Any -> IntVal 0, mem
          | None -> failwith "Not in memory")
-      | _ -> failwith "Should not happen")
+      | _ -> failwith "Nth: Should not happen")
   | Alloc -> (match (List.hd vals) with
       | IntVal n -> let (a, mem') = allocn mem n in (Block (a, n), mem')
-      | _ -> failwith "Should not happen")
+      | _ -> failwith "Alloc: Should not happen")
 
 (** Evaluate an expression and return a value *)
-let rec eval_expr (env, mem, outFlow) e = match e with
+let rec eval_expr (env, mem, outFlow) = function
   | Bool b -> if b then IntVal 1, mem, outFlow else IntVal 0, mem, outFlow
   | IntConst i -> IntVal i, mem, outFlow
   | Sym s -> (match (lookup_env env s) with
@@ -105,7 +106,7 @@ let rec eval_expr (env, mem, outFlow) e = match e with
   | If (c, t, e) -> (match (eval_expr (env, mem, outFlow) c) with
       | IntVal 1, mem', outFlow' -> (eval_expr (env, mem', outFlow') t)
       | IntVal 0, mem', outFlow' -> (eval_expr (env, mem', outFlow') e)
-      | _ -> failwith "Should not happen")
+      | _ -> failwith "If: Should not happen")
   | Op (op, exprs) ->
     let (args, mem, outFlow') = (List.fold_left (fun (a, m, outF) e ->
         let (v, m', outF') = eval_expr (env, m, outF) e in v::a, m', outF') ([], mem, outFlow) exprs) in
@@ -116,7 +117,18 @@ let rec eval_expr (env, mem, outFlow) e = match e with
     (match c with
      | Closure (e', r) -> eval_expr ((r (List.rev args)), mem'', outFlow'') e'
      | RecClosure rf -> let (e', r) = (rf c) in eval_expr ((r (List.rev args)), mem'', outFlow'') e'
-     | _ -> failwith "Should not happen")
+     | ProcClosure (b, r) -> let (v, mem''', outFlow''') = eval_block ((r (List.rev args)), mem'', outFlow'') b in
+       (match v with
+        | Value v -> (v, restrict_mem mem''' (("'d", v)::env), outFlow''')
+        | Empty -> failwith "App(ProcClosure): Should not happen"
+       )
+     | RecProcClosure rp -> let (b, r) = (rp c) in
+       let (v, mem''', outFlow''') = eval_block ((r (List.rev args)), mem'', outFlow'') b in
+       (match v with
+        | Value v -> (v, restrict_mem mem''' (("'d", v)::env), outFlow''')
+        | Empty -> failwith "App(ProcClosure): Should not happen"
+       )
+     | _ -> failwith "App: Should not happen")
   | Abs (a, e) -> Closure (e, (fun args -> (List.combine (fst (List.split a)) args)@env)), mem, outFlow
 
 (** Evaluate a declaration *)
@@ -136,14 +148,20 @@ and eval_dec (env, mem, outFlow) = function
   | RecProcDec (x, a, b) -> let rpc = RecProcClosure (fun p ->
       (b, fun args -> (x, p)::(List.combine (fst (List.split a)) args)@env)) in
     ((x, rpc)::env, mem, outFlow)
-  | _ -> failwith "Dec not yet implemented"
+  | FunProcDec (x, _, a, b) ->
+    let pc = ProcClosure (b, fun args -> (List.combine (fst (List.split a)) args)@env) in
+    ((x, pc)::env, mem, outFlow)
+  | RecFunProcDec (x, _, a, b) ->
+    let rpc = RecProcClosure (fun p ->
+        (b, fun args -> (x, p)::(List.combine (fst (List.split a)) args)@env)) in
+    ((x, rpc)::env, mem, outFlow)
 
 (** Evaluate an left value *)
 and eval_lval (env, mem, outFlow) = function
   | SymLval s -> (match (lookup_env env s) with
       | Addr a -> ((Addr a), mem, outFlow)
       | Block (b, n) -> (Block (b,n), mem, outFlow)
-      | _ -> failwith "Should not happen")
+      | _ -> failwith "SymLval: Should not happen")
   | Nth (lval, ie) -> let (b, mem', outFlow') = eval_lval (env, mem, outFlow) lval in
     let (iv, mem'', outFlow'') = eval_expr (env, mem', outFlow') ie in (match b, iv with
       | Block (b, n), IntVal i -> if i < 0 || i > n then raise ArrayIndexOutOfBoundsEx;
@@ -152,52 +170,65 @@ and eval_lval (env, mem, outFlow) = function
           | Some (Block (b, n)) -> if i < 0 || i > n then raise ArrayIndexOutOfBoundsEx;
             (Addr (b+i), mem'', outFlow'')
           | _ -> failwith "Not in memory")
-      | _ -> failwith "Should not happen")
+      | _ -> failwith "Nth: Should not happen")
 
 (** Evaluate a statement *)
 and eval_stat (env, mem, outFlow) = function
-  | Echo e -> (match (eval_expr (env, mem, outFlow) e) with (IntVal i, mem', outFlow') -> mem', (i::outFlow')
-                                                 | _ -> failwith "Should not happen")
+  | Echo e -> (match (eval_expr (env, mem, outFlow) e) with (IntVal i, mem', outFlow') -> Empty, mem', (i::outFlow')
+                                                 | _ -> failwith "Echo: Should not happen")
   | Set (x, e) -> let (v, mem', outFlow') = eval_expr (env, mem, outFlow) e in
     let (a, mem'', outFlow'') = eval_lval (env, mem', outFlow') x in (match a with
-      | Addr a -> mem''.(a) <- Some v; (mem'', outFlow'')
-      | _ -> failwith "Should not happen")
+      | Addr a -> mem''.(a) <- Some v; (Empty, mem'', outFlow'')
+      | _ -> failwith "Set: Should not happen")
   | Ifs (c, t, e) -> (match (eval_expr (env, mem, outFlow) c) with
-      | (IntVal 1, mem', outFlow') -> let (mem'', outFlow'') = eval_block (env, mem', outFlow') t in
-        ((restrict_mem mem'' env), outFlow'')
-      | (IntVal 0, mem', outFlow') -> let (mem'', outFlow'') = eval_block (env, mem', outFlow') e in
-        ((restrict_mem mem'' env), outFlow'')
-      | _ -> failwith "Should not happen")
+      | (IntVal 1, mem', outFlow') -> let (v, mem'', outFlow'') = eval_block (env, mem', outFlow') t in
+        (v, (restrict_mem mem'' env), outFlow'')
+      | (IntVal 0, mem', outFlow') -> let (v, mem'', outFlow'') = eval_block (env, mem', outFlow') e in
+        (v, (restrict_mem mem'' env), outFlow'')
+      | _ -> failwith "Ifs: Should not happen")
   | While (c, b) -> (match (eval_expr (env, mem, outFlow) c) with
-      | (IntVal 0, mem', outFlow') -> (mem', outFlow')
-      | (IntVal 1, mem', outFlow') -> let (mem'', outFlow'') = eval_block (env, mem', outFlow') b in
-        eval_stat (env, (restrict_mem mem'' env), outFlow'') (While (c, b))
-      | _ -> failwith "Should not happen")
+      | (IntVal 0, mem', outFlow') -> (Empty, mem', outFlow')
+      | (IntVal 1, mem', outFlow') -> let (v, mem'', outFlow'') = eval_block (env, mem', outFlow') b in
+        (match v with
+         | Empty -> eval_stat (env, (restrict_mem mem'' env), outFlow'') (While (c, b))
+         | Value _ -> (v, (restrict_mem mem'' env), outFlow''))
+      | _ -> failwith "While: Should not happen")
   | Call (x, exprs) -> let p = lookup_env env x in
     let (args, mem', outFlow') = (List.fold_left
                           (fun (a, m, outF) e ->
                             let (v, m', outF') = eval_expr (env, m, outF) e in v::a, m', outF')
                           ([], mem, outFlow) exprs) in
     (match p with
-     | ProcClosure (b, r) -> let (mem'', outFlow'') = eval_block ((r (List.rev args)), mem', outFlow') b in
-       ((restrict_mem mem'' env), outFlow'')
+     | ProcClosure (b, r) -> let (v, mem'', outFlow'') = eval_block ((r (List.rev args)), mem', outFlow') b in
+       (v, (restrict_mem mem'' env), outFlow'')
      | RecProcClosure rp -> let (b, r) = rp p in
-       let (mem'', outFlow'') = eval_block ((r (List.rev args)), mem', outFlow') b in
-       ((restrict_mem mem'' env), outFlow'')
-     | _ -> failwith "Should not happen")
+       let (v, mem'', outFlow'') = eval_block ((r (List.rev args)), mem', outFlow') b in
+       (v, (restrict_mem mem'' env), outFlow'')
+     | _ -> failwith "Call: Should not happen")
+
+(** Evaluate a return command *)
+and eval_ret (env, mem, outFlow) (Return e) =
+  eval_expr (env, mem, outFlow) e
 
 (** Evaluate a single command (either declaration or statement) *)
-and eval_cmd (env, mem, outFlow) = function
-  | Dec d -> eval_dec (env, mem, outFlow) d
-  | Stat s -> let (mem, outFlow) = eval_stat (env, mem, outFlow) s in (env, mem, outFlow)
-  | Ret _ -> failwith "Return not yet implemented"
+and eval_cmds (env, mem, outFlow) = function
+  | (Dec d)::cs -> eval_cmds (eval_dec (env, mem, outFlow) d) cs
+  | (Stat s)::cs -> let (v, mem', outFlow') = eval_stat (env, mem, outFlow) s in
+    (match v with
+     | Empty -> eval_cmds (env, mem', outFlow') cs
+     | Value _ -> (v, mem', outFlow'))
+  | [Ret r] -> let (v, mem', outFlow') = eval_ret (env, mem, outFlow) r in (Value v, mem', outFlow')
+  | [] -> (Empty, mem, outFlow)
+  | _ -> failwith "cmds: Should not happen"
 
 (** Evaluate a block *)
-and eval_block startState p =
-  let (_, mem, outFlow) = List.fold_left eval_cmd startState p in
-  (mem, outFlow)
+and eval_block (env, mem, outFlow) b = eval_cmds (env, mem, outFlow) b
+  (* let (v, _, mem, outFlow) =
+   *   List.fold_left
+   *     (fun (_, env, mem, outFlow) cmd -> eval_cmd (env, mem, outFlow) cmd) (Empty, env, mem, outFlow) p in
+   * (v, mem, outFlow) *)
 
 (** Evaluate the whole program *)
 let eval_prog p =
-  let (_, outFlow) = eval_block ([], [|None|], []) p in
+  let (_, _, outFlow) = eval_block ([], [|None|], []) p in
   List.rev outFlow
