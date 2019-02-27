@@ -1,0 +1,10 @@
+[
+  FUN f int [x:int] [
+      WHILE (lt x 10) [
+          ECHO x;
+          RETURN x
+      ];
+      RETURN x
+  ];
+  ECHO (f 5)
+]

@@ -92,8 +92,7 @@ and string_of_stat = function
   | While (c, b) -> Printf.sprintf "WHILE %s\n%s" (string_of_expr c) (string_of_prog b)
   | Call (p, exprs) -> Printf.sprintf "CALL %s %s" p (String.concat " " (List.map string_of_expr exprs))
 
-and string_of_ret = function
-  | Return e -> Printf.sprintf "RETURN %s" (string_of_expr e)
+and string_of_ret (Return e) = Printf.sprintf "RETURN %s" (string_of_expr e)
 
 and string_of_cmd = function
   | Stat s -> string_of_stat s

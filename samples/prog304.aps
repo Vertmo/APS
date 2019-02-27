@@ -1,0 +1,9 @@
+[
+  FUN f int [x:int] [
+    IF (lt x 2)
+       [IF (eq x 1) [RETURN (add x 1)] [ECHO x]]
+       [IF (eq x 2) [RETURN (sub x 1)] [ECHO x]];
+       RETURN x
+  ];
+  ECHO (f 3)
+]

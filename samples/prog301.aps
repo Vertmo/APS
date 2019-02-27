@@ -7,7 +7,7 @@
 	  [ RETURN (f (add x 1)) ]
 	  [ RETURN (f (sub x 1)) ]
       ]
-  ];    
+  ];
   ECHO (f 42);
   ECHO (f 40);
   ECHO (f 45)

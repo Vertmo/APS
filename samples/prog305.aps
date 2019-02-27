@@ -1,0 +1,12 @@
+[
+  FUN f int [x:int] [
+      VAR y int;
+      SET y x;
+      WHILE (lt y 10) [
+            ECHO y;
+            SET y (add y 1)
+      ];
+      RETURN x
+  ];
+  ECHO (f 5)
+]

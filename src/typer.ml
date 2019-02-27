@@ -34,7 +34,16 @@ and prolog_of_dec = function
   | VarDec (x, t) -> Printf.sprintf "var(\"%s\", %s)" x (prolog_of_type t)
   | ProcDec (x, a, p) -> Printf.sprintf "proc(\"%s\", [%s], %s)" x (prolog_of_args a) (prolog_of_prog p)
   | RecProcDec (x, a, p) -> Printf.sprintf "procrec(\"%s\", [%s], %s)" x (prolog_of_args a) (prolog_of_prog p)
-  | _ -> failwith "Dec not yet implemented"
+  | FunProcDec (x, t, a, b) -> Printf.sprintf "funproc(\"%s\", %s, [%s], %s)"
+                                 x
+                                 (prolog_of_type t)
+                                 (prolog_of_args a)
+                                 (prolog_of_prog b)
+  | RecFunProcDec (x, t, a, b) -> Printf.sprintf "funprocrec(\"%s\", %s, [%s], %s)"
+                                x
+                                (prolog_of_type t)
+                                (prolog_of_args a)
+                                (prolog_of_prog b)
 
 and prolog_of_lval = function
   | SymLval s -> Printf.sprintf "sym(\"%s\")" s
@@ -47,10 +56,12 @@ and prolog_of_stat = function
   | While (c, b) -> Printf.sprintf "while(%s, %s)" (prolog_of_expr c) (prolog_of_prog b)
   | Call (x, exprs) -> Printf.sprintf "call(\"%s\", [%s])" x (String.concat "," (List.map prolog_of_expr exprs))
 
+and prolog_of_ret (Return e) = Printf.sprintf "return(%s)" (prolog_of_expr e)
+
 and prolog_of_cmd = function
   | Stat s -> prolog_of_stat s
   | Dec d -> prolog_of_dec d
-  | Ret _ -> failwith "Return not yet implemented"
+  | Ret r -> prolog_of_ret r
 
 and prolog_of_prog p = Printf.sprintf "[%s]"
     (String.concat "," (List.map prolog_of_cmd p))
