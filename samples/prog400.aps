@@ -1,0 +1,3 @@
+[
+  ECHO (LET x = 41 IN (add x 1))
+]

@@ -21,6 +21,7 @@ rule token = parse
   | "if" { IF }
   | "len" { LEN } | "nth" { NTH } | "alloc" { ALLOC }
   | "RETURN" { RETURN }
+  | "LET" { LET } | '=' { EQUAL } | "IN" { IN }
   | ('-'?)['0'-'9']+ { NUM (int_of_string(Lexing.lexeme lexbuf)) }
   | ['a'-'z''A'-'Z']['a'-'z''A'-'Z''0'-'9']* { IDENT (Lexing.lexeme lexbuf) }
   | eof { EOF }

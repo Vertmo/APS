@@ -18,6 +18,7 @@
 %token ADD SUB MUL DIV
 %token IF
 %token LEN NTH ALLOC
+%token LET EQUAL IN
 %token <int> NUM
 %token <string> IDENT
 %token EOF
@@ -109,6 +110,7 @@ expr:
   | LPAR opPrim exprs RPAR { Op($2, $3) }
   | LBRACKET args RBRACKET expr { Abs($2, $4) }
   | LPAR expr exprs RPAR { App($2, $3) }
+  | LPAR LET IDENT EQUAL expr IN expr RPAR { Let($3, $5, $7) }
 ;;
 
 exprs:

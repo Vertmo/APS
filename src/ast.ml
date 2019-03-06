@@ -26,6 +26,7 @@ type expr =
   | Op of opPrim * expr list
   | Abs of arg list * expr
   | App of expr * expr list
+  | Let of string * expr * expr
 
 and dec =
   | ConstDec of string * eType * expr
@@ -60,6 +61,7 @@ let rec string_of_expr = function
   | Op (op, exprs) -> Printf.sprintf "(%s %s)" (string_of_opprim op) (String.concat " " (List.map string_of_expr exprs))
   | Abs (args, body) -> Printf.sprintf ("[%s] %s") (string_of_args args) (string_of_expr body)
   | App (f, exprs) -> Printf.sprintf "(%s %s)" (string_of_expr f) (String.concat " " (List.map string_of_expr exprs))
+  | Let (x, e, b) -> Printf.sprintf "let %s = %s in %s" x (string_of_expr e) (string_of_expr b)
 
 and string_of_dec = function
   | ConstDec (x, t, e) -> Printf.sprintf "CONST %s %s %s" x (string_of_type t) (string_of_expr e)
