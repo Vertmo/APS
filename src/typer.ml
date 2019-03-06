@@ -18,7 +18,7 @@ let rec prolog_of_expr = function
                         (String.concat "," (List.map prolog_of_expr exprs))
   | Abs (args, body) -> Printf.sprintf "abs([%s], %s)" (prolog_of_args args) (prolog_of_expr body)
   | App (f, exprs) -> Printf.sprintf "app(%s, [%s])" (prolog_of_expr f) (String.concat "," (List.map prolog_of_expr exprs))
-  | Let _ -> failwith "Not yet implemented"
+  | Let (x, e, b) -> Printf.sprintf "let(\"%s\", %s, %s)" x (prolog_of_expr e) (prolog_of_expr b)
 
 and prolog_of_dec = function
   | ConstDec (x, t, e) -> Printf.sprintf "const(\"%s\", %s, %s)" x (prolog_of_type t) (prolog_of_expr e)

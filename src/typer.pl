@@ -96,6 +96,8 @@ check_expr_type(Env, app(sym("len"), [E]), int) :-
     check_expr_type(Env, E, vec(_)).
 check_expr_type(Env, app(F, Es), T) :-
     check_expr_type(Env, F, Ft), check_app_type(Env, Ft, Es, T).
+check_expr_type(Env, let(X, E, B), T) :-
+    check_expr_type(Env, E, T1), check_expr_type([X:T1|Env], B, T).
 
 %% Check a function application (by checking passed arguments and return type)
 check_app_type(_, [T|[]], [], T).
