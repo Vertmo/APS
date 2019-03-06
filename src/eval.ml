@@ -130,7 +130,8 @@ let rec eval_expr (env, mem, outFlow) = function
        )
      | _ -> failwith "App: Should not happen")
   | Abs (a, e) -> Closure (e, (fun args -> (List.combine (fst (List.split a)) args)@env)), mem, outFlow
-  | _ -> failwith "Not yet implemented"
+  | Let (x, e, b) -> let (v, mem', outFlow') = eval_expr (env, mem, outFlow) e in
+    eval_expr ((x,v)::env, mem', outFlow') b
 
 (** Evaluate a declaration *)
 and eval_dec (env, mem, outFlow) = function

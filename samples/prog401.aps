@@ -1,0 +1,7 @@
+[
+  FUN f int [x:int] [
+      ECHO x;
+      RETURN (add x 1)
+  ];
+  ECHO (LET x = (f 40) IN (f x))
+]

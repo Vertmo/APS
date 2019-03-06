@@ -1,4 +1,4 @@
-let samplesLoc = "../../samples/" and samplesNb = [|21;21;9;7;1|]
+let samplesLoc = "../../samples/" and samplesNb = [|21;21;9;7;2|]
 
 let generateFileNames loc version nb =
   List.init nb (fun i -> let si = (string_of_int i) in
@@ -31,8 +31,8 @@ let generateAndTest loc version nb =
   Printf.printf "Tested evaluation for version %d successfully !\n" version
 
 let _ =
-  (* generateAndTest samplesLoc 0 samplesNb.(0);
-   * generateAndTest samplesLoc 1 samplesNb.(1);
-   * generateAndTest samplesLoc 2 samplesNb.(2);
-   * generateAndTest samplesLoc 3 samplesNb.(3); *)
+  generateAndTest samplesLoc 0 samplesNb.(0);
+  generateAndTest samplesLoc 1 samplesNb.(1);
+  generateAndTest samplesLoc 2 samplesNb.(2);
+  generateAndTest samplesLoc 3 samplesNb.(3);
   generateAndTest samplesLoc 4 samplesNb.(4)
