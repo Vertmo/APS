@@ -6,6 +6,7 @@ let rec prolog_of_type = function
   | Int -> "int" | Bool -> "bool" | Void -> "void"
   | Vec t -> Printf.sprintf "vec(%s)" (prolog_of_type t)
   | Fun (l, t) -> Printf.sprintf "[%s,%s]" (String.concat "," (List.map prolog_of_type l)) (prolog_of_type t)
+  | TypeVar s -> Printf.sprintf "tvar(\"%s\")" s
 
 let prolog_of_args a = (String.concat "," (List.map (fun (s, t) -> Printf.sprintf "\"%s\":%s" s (prolog_of_type t)) a))
 

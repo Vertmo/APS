@@ -1,5 +1,5 @@
 [
-  FUN REC fold int [f:(int * int -> int), xs:(vec int), a:int, i:int] (
+  FUN REC fold 'b [f:('a * 'b -> 'b), xs:(vec 'a), a:'b, i:int] (
     if (lt i (len xs))
       (f (nth xs i) (fold f xs a (add i 1)))
       a

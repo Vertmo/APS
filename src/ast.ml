@@ -1,11 +1,13 @@
 type eType = Int | Bool | Void
            | Vec of eType
            | Fun of (eType list * eType)
+           | TypeVar of string
 
 let rec string_of_type = function
   | Int -> "int" | Bool -> "bool" | Void -> "void"
   | Vec t -> Printf.sprintf "vec %s" (string_of_type t)
   | Fun (l, t) -> Printf.sprintf "(%s -> %s)" (String.concat "*" (List.map string_of_type l)) (string_of_type t)
+  | TypeVar s -> s
 
 type opPrim = Not | And | Or | Eq | Lt | Add | Sub | Mul | Div | Len | Nth | Alloc
 

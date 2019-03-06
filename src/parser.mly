@@ -21,6 +21,7 @@
 %token LET EQUAL IN
 %token <int> NUM
 %token <string> IDENT
+%token <string> TVAR
 %token EOF
 
 %start<Ast.prog> main;;
@@ -82,6 +83,7 @@ eType:
   | VOID { Void }
   | LPAR VEC eType RPAR { Vec($3) }
   | LPAR eTypes ARROW eType RPAR { Fun ($2, $4) }
+  | TVAR { TypeVar($1) }
 ;;
 
 eTypes:
