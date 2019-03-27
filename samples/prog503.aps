@@ -1,0 +1,4 @@
+[
+  FUN f 'a [x:'a, y:'b, z:'a] z;
+  ECHO (f 43 true 42)
+]

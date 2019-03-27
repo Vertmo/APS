@@ -1,0 +1,4 @@
+[
+  FUN g 'a [f: ('a -> 'a), x:'a] (f x);
+  ECHO (LET f = [x:'a] x IN (g f 42))
+]

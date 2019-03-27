@@ -1,0 +1,4 @@
+[
+  FUN f ('b -> 'a) [src: 'b, res: 'a] [src:'b] res;
+  ECHO ((f true 42) false)
+]
