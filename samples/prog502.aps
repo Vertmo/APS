@@ -1,0 +1,4 @@
+[
+  FUN f 'b [x:'a, y:'b] y;
+  ECHO (f 42 31)
+]

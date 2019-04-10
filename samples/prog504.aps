@@ -1,0 +1,11 @@
+[
+  FUN nieme 'a [xs:(vec 'a), n: int] [
+    RETURN (nth xs n)
+  ];
+  CONST xs (vec int) (alloc 4);
+  SET (nth xs 0) 41;
+  SET (nth xs 1) 42;
+  SET (nth xs 2) 43;
+  SET (nth xs 3) 44;
+  ECHO (nieme xs 1)
+]

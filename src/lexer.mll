@@ -23,5 +23,7 @@ rule token = parse
   | "RETURN" { RETURN }
   | "LET" { LET } | '=' { EQUAL } | "IN" { IN }
   | ('-'?)['0'-'9']+ { NUM (int_of_string(Lexing.lexeme lexbuf)) }
+  | '\''['a'-'z']+ { let s = (Lexing.lexeme lexbuf) in
+                     TVAR (String.sub s 1 ((String.length s)-1)) }
   | ['a'-'z''A'-'Z']['a'-'z''A'-'Z''0'-'9']* { IDENT (Lexing.lexeme lexbuf) }
   | eof { EOF }
