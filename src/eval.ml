@@ -24,31 +24,11 @@ let rec lookup_env env s = match env with
   | _::q -> lookup_env q s
   | [] -> failwith "lookup_env: Should not happen"
 
-(* On utilise des tableaux dynamiques pour gérer la mémoire *)
-let rec allocn m n =
-  let created = ref (None:int option) in
-  for i = 0 to (Array.length m) - n do
-    if !created = None then (
-      let isSpace = ref true in
-      for j = i to i+n-1 do
-        if m.(j) <> None then isSpace := false;
-      done;
-      if !isSpace then created := Some i;
-    )
-  done;
-  match !created with
-  | Some k -> (
-      for i = k to k+n-1 do
-        m.(i) <- Any
-      done;
-      (k, m)
-    )
-  | None -> (
-      let l = Array.length m in
-      let m' = Array.make (l*2) None in
-      Array.blit m 0 m' 0 l;
-      allocn m' n
-    )
+let allocn m n =
+  let l = Array.length m in
+  let m' = Array.make (l+n) Any in
+  Array.blit m 0 m' 0 l;
+  (l, m')
 
 let compute_all_reachable mem env =
   let rec c_a_reach_aux env =
@@ -232,5 +212,5 @@ and eval_block (env, mem, outFlow) b = eval_cmds (env, mem, outFlow) b
 
 (** Evaluate the whole program *)
 let eval_prog p =
-  let (_, _, outFlow) = eval_block ([], [|None|], []) p in
+  let (_, _, outFlow) = eval_block ([], [||], []) p in
   List.rev outFlow
