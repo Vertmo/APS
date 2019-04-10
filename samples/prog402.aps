@@ -1,0 +1,13 @@
+[
+  FUN setTrue (vec bool) [n:int, v:(vec bool)] [
+    VAR i int;
+    SET i 0;
+    WHILE (lt i n) [
+      SET (nth v i) true;
+      SET i (add i 1)
+    ];
+    RETURN v
+  ];
+  FUN f bool [x:int] (LET v = (alloc 2) IN (nth (setTrue 2 v) 1));
+  IF (f 0) [ ECHO 1 ] [ ECHO 0 ]
+]
