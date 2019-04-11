@@ -1,4 +1,4 @@
-let samplesLoc = "../../samples/" and samplesNb = [|21;21;9;7;3;11|]
+let samplesLoc = "samples/" and samplesNb = [|21;21;9;7;3;11|]
 
 let generateFileNames loc version nb =
   List.init nb (fun i -> let si = (string_of_int i) in
@@ -6,15 +6,15 @@ let generateFileNames loc version nb =
                  Printf.sprintf "%sprog%s%s.aps" loc (string_of_int version) si)
 
 let testParse f =
-  if Sys.command (Printf.sprintf "./src/aps.exe -parse %s > /dev/null" f) <> 0
+  if Sys.command (Printf.sprintf "./aps.byte -parse %s > /dev/null" f) <> 0
   then failwith (Printf.sprintf "Parse failed for file %s" f)
 
 let testType f =
-  if Sys.command (Printf.sprintf "./src/aps.exe -type %s > /dev/null " f) <> 0
+  if Sys.command (Printf.sprintf "./aps.byte -type %s > /dev/null " f) <> 0
   then failwith (Printf.sprintf "Typing failed for file %s" f)
 
 let testEval f res =
-  let ic = Unix.open_process_in (Printf.sprintf "./src/aps.exe -eval %s" f) in
+  let ic = Unix.open_process_in (Printf.sprintf "./aps.byte -eval %s" f) in
   try (
     if (input_line ic) <> res
     then failwith (Printf.sprintf "Evaluation failed for file %s" f)
@@ -23,12 +23,12 @@ let testEval f res =
 let generateAndTest loc version nb =
   let files = generateFileNames loc version nb in
   List.iter testParse files;
-  Printf.printf "Tested parse for version %d successfully !\n" version;
+  Printf.printf "Tested parse for version %d successfully !" version; print_newline ();
   List.iter testType files;
-  Printf.printf "Tested typing for version %d successfully !\n" version;
+  Printf.printf "Tested typing for version %d successfully !" version; print_newline ();
   let res = open_in (Printf.sprintf "%s/res%s.txt" loc (string_of_int version)) in
   List.iter (fun f -> testEval f (input_line res)) files;
-  Printf.printf "Tested evaluation for version %d successfully !\n" version
+  Printf.printf "Tested evaluation for version %d successfully !" version; print_newline ()
 
 let _ =
   generateAndTest samplesLoc 0 samplesNb.(0);
