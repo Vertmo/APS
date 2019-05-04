@@ -2,7 +2,8 @@ open Ast
 
 type value = IntVal of int | Closure of closure | RecClosure of recclosure
            | Addr of int | ProcClosure of procclosure | RecProcClosure of recprocclosure
-           | Block of int * int | PairVal of value * value
+           | Block of int * int
+           | PairVal of value * value | InL of value | InR of value
 and closure = (expr * (value list -> env))
 and recclosure = value -> closure
 and procclosure = (cmd list * (value list -> env))
@@ -124,7 +125,14 @@ let rec eval_expr (env, mem, outFlow) = function
     let (v, mem', outFlow') = eval_expr (env, mem, outFlow) e in (match v with
         | PairVal (_, v2) -> (v2, mem', outFlow')
         | _ -> failwith "Fst: Should not happen")
-(* Sum types (TODO) *)
+  (* Sum types *)
+  | InL (_, e) -> let (v, mem', outFlow') = eval_expr (env, mem, outFlow) e in (InL v, mem', outFlow')
+  | InR (_, e) -> let (v, mem', outFlow') = eval_expr (env, mem, outFlow) e in (InR v, mem', outFlow')
+  | Case (e, x1, e1, x2, e2) -> let (v, mem', outFlow') = eval_expr (env, mem, outFlow) e in
+    (match v with
+     | InL v -> eval_expr ((x1, v)::env, mem', outFlow') e1
+     | InR v -> eval_expr ((x2, v)::env, mem', outFlow') e2
+     | _ -> failwith "Case: Should not happen")
 
 (** Evaluate a declaration *)
 and eval_dec (env, mem, outFlow) = function

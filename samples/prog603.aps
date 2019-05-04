@@ -1,0 +1,7 @@
+[
+  FUN extractLDef 'a [x:('a + 'b),d:'a] (case x of inl x => x | inr x => d);
+  FUN extractRDef 'b [x:('a + 'b),d:'b] (case x of inl x => d | inr x => x);
+  ECHO (extractLDef (inl bool 42) 0);
+  ECHO (extractLDef (inr int true) 42);
+  ECHO (extractRDef (inl int true) 0)
+]
