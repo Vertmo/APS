@@ -1,0 +1,4 @@
+[
+  FUN fstfun 'a [p:('a * 'b)] p.fst;
+  ECHO (fstfun (42, true))
+]

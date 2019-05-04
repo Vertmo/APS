@@ -31,10 +31,10 @@ find_type_vars([tvar(V)|Ts], [V|Vs]) :- find_type_vars(Ts, Vs).
 find_type_vars([vec(T)|Ts], Vs) :-
     find_type_vars([T], Vs1), find_type_vars(Ts, Vs2), append(Vs1, Vs2, Vs).
 find_type_vars([tprod(T1, T2)|Ts], Vs) :-
-    find_type_vars(T1, Vs1), find_type_vars(T2, Vs2), find_type_vars(Ts, Vs3),
+    find_type_vars([T1], Vs1), find_type_vars([T2], Vs2), find_type_vars(Ts, Vs3),
     append(Vs1, Vs2, Vs4), append(Vs3, Vs4, Vs).
 find_type_vars([tfun(Tin, To)|Ts], Vs) :-
-    find_type_vars(Tin, Vs1), find_type_vars(To, Vs2), find_type_vars(Ts, Vs3),
+    find_type_vars(Tin, Vs1), find_type_vars([To], Vs2), find_type_vars(Ts, Vs3),
     append(Vs1, Vs2, Vs4), append(Vs3, Vs4, Vs).
 find_type_vars([[FT|FTs]|Ts], Vs) :-
     find_type_vars([FT|FTs], Vs1), find_type_vars(Ts, Vs2),

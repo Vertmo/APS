@@ -2,7 +2,7 @@ open Ast
 
 type value = IntVal of int | Closure of closure | RecClosure of recclosure
            | Addr of int | ProcClosure of procclosure | RecProcClosure of recprocclosure
-           | Block of int * int
+           | Block of int * int | PairVal of value * value
 and closure = (expr * (value list -> env))
 and recclosure = value -> closure
 and procclosure = (cmd list * (value list -> env))
@@ -112,6 +112,17 @@ let rec eval_expr (env, mem, outFlow) = function
   | Abs (a, e) -> Closure (e, (fun args -> (List.combine (fst (List.split a)) args)@env)), mem, outFlow
   | Let (x, e, b) -> let (v, mem', outFlow') = eval_expr (env, mem, outFlow) e in
     eval_expr ((x,v)::env, mem', outFlow') b
+  | Pair (e1, e2) ->
+    let (v1, mem', outFlow') = eval_expr (env, mem, outFlow) e1 in
+    let (v2, mem', outFlow') = eval_expr (env, mem', outFlow') e2 in ((PairVal (v1, v2)), mem', outFlow')
+  | Fst e ->
+    let (v, mem', outFlow') = eval_expr (env, mem, outFlow) e in (match v with
+    | PairVal (v1, _) -> (v1, mem', outFlow')
+    | _ -> failwith "Fst: Should not happen")
+  | Snd e ->
+    let (v, mem', outFlow') = eval_expr (env, mem, outFlow) e in (match v with
+        | PairVal (_, v2) -> (v2, mem', outFlow')
+        | _ -> failwith "Fst: Should not happen")
 
 (** Evaluate a declaration *)
 and eval_dec (env, mem, outFlow) = function
@@ -205,10 +216,6 @@ and eval_cmds (env, mem, outFlow) = function
 
 (** Evaluate a block *)
 and eval_block (env, mem, outFlow) b = eval_cmds (env, mem, outFlow) b
-  (* let (v, _, mem, outFlow) =
-   *   List.fold_left
-   *     (fun (_, env, mem, outFlow) cmd -> eval_cmd (env, mem, outFlow) cmd) (Empty, env, mem, outFlow) p in
-   * (v, mem, outFlow) *)
 
 (** Evaluate the whole program *)
 let eval_prog p =
