@@ -7,6 +7,7 @@ let rec prolog_of_type = function
   | Vec t -> Printf.sprintf "vec(%s)" (prolog_of_type t)
   | Fun (l, t) -> Printf.sprintf "tfun([%s],%s)" (String.concat "," (List.map prolog_of_type l)) (prolog_of_type t)
   | TypeVar s -> Printf.sprintf "tvar(\"%s\")" s
+  | Product (t1, t2) -> Printf.sprintf "tprod(%s, %s)" (prolog_of_type t1) (prolog_of_type t2)
 
 let prolog_of_args a = (String.concat "," (List.map (fun (s, t) -> Printf.sprintf "\"%s\":%s" s (prolog_of_type t)) a))
 
@@ -20,6 +21,8 @@ let rec prolog_of_expr = function
   | Abs (args, body) -> Printf.sprintf "abs([%s], %s)" (prolog_of_args args) (prolog_of_expr body)
   | App (f, exprs) -> Printf.sprintf "app(%s, [%s])" (prolog_of_expr f) (String.concat "," (List.map prolog_of_expr exprs))
   | Let (x, e, b) -> Printf.sprintf "let(\"%s\", %s, %s)" x (prolog_of_expr e) (prolog_of_expr b)
+  | Pair (e1, e2) -> Printf.sprintf "pair(%s, %s)" (prolog_of_expr e1) (prolog_of_expr e2)
+  | Fst e -> Printf.sprintf "fst(%s)" (prolog_of_expr e) | Snd e -> Printf.sprintf "snd(%s)" (prolog_of_expr e)
 
 and prolog_of_dec = function
   | ConstDec (x, t, e) -> Printf.sprintf "const(\"%s\", %s, %s)" x (prolog_of_type t) (prolog_of_expr e)

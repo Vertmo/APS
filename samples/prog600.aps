@@ -1,0 +1,4 @@
+[
+  CONST p (bool * int) (true, 42);
+  ECHO (if p.fst p.snd 0)
+]

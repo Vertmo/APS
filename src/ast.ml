@@ -2,12 +2,14 @@ type eType = Int | Bool | Void
            | Vec of eType
            | Fun of (eType list * eType)
            | TypeVar of string
+           | Product of (eType * eType)
 
 let rec string_of_type = function
   | Int -> "int" | Bool -> "bool" | Void -> "void"
   | Vec t -> Printf.sprintf "vec %s" (string_of_type t)
   | Fun (l, t) -> Printf.sprintf "(%s -> %s)" (String.concat "*" (List.map string_of_type l)) (string_of_type t)
   | TypeVar s -> s
+  | Product (t1, t2) -> Printf.sprintf "(%s * %s)" (string_of_type t1) (string_of_type t2)
 
 type opPrim = Not | And | Or | Eq | Lt | Add | Sub | Mul | Div | Len | Nth | Alloc
 
@@ -29,6 +31,7 @@ type expr =
   | Abs of arg list * expr
   | App of expr * expr list
   | Let of string * expr * expr
+  | Pair of expr * expr | Fst of expr | Snd of expr
 
 and dec =
   | ConstDec of string * eType * expr
@@ -64,6 +67,8 @@ let rec string_of_expr = function
   | Abs (args, body) -> Printf.sprintf ("[%s] %s") (string_of_args args) (string_of_expr body)
   | App (f, exprs) -> Printf.sprintf "(%s %s)" (string_of_expr f) (String.concat " " (List.map string_of_expr exprs))
   | Let (x, e, b) -> Printf.sprintf "let %s = %s in %s" x (string_of_expr e) (string_of_expr b)
+  | Pair (e1, e2) -> Printf.sprintf "(%s, %s)" (string_of_expr e1) (string_of_expr e2)
+  | Fst e -> Printf.sprintf "%s.fst" (string_of_expr e) | Snd e -> Printf.sprintf "%s.fst" (string_of_expr e)
 
 and string_of_dec = function
   | ConstDec (x, t, e) -> Printf.sprintf "CONST %s %s %s" x (string_of_type t) (string_of_expr e)

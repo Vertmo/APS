@@ -7,7 +7,8 @@ rule token = parse
   | [' ' '\t' '\n'] { token lexbuf }
   | '[' { LBRACKET } | ']' { RBRACKET }
   | '(' { LPAR } | ')' { RPAR }
-  | ';' { SEMICOL } | ':' { PPOINT } | ',' { COMMA } | '*' { STAR } | "->" { ARROW }
+  | ';' { SEMICOL } | ':' { PPOINT } | ',' { COMMA } | '.' { DOT }
+  | '*' { STAR } | "->" { ARROW }
   | "CONST" { CONST } | "FUN" { FUN } | "REC" { REC }
   | "ECHO" { ECHO }
   | "VAR" { VAR } | "SET" { SET }
@@ -22,6 +23,7 @@ rule token = parse
   | "len" { LEN } | "nth" { NTH } | "alloc" { ALLOC }
   | "RETURN" { RETURN }
   | "LET" { LET } | '=' { EQUAL } | "IN" { IN }
+  | "fst" { FST } | "snd" { SND }
   | ('-'?)['0'-'9']+ { NUM (int_of_string(Lexing.lexeme lexbuf)) }
   | '\''['a'-'z']+ { let s = (Lexing.lexeme lexbuf) in
                      TVAR (String.sub s 1 ((String.length s)-1)) }

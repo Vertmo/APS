@@ -5,7 +5,7 @@
 %token LBRACKET RBRACKET
 %token LPAR RPAR
 %token SEMICOL PPOINT
-%token COMMA
+%token COMMA DOT
 %token STAR
 %token ARROW
 %token CONST FUN REC
@@ -19,6 +19,7 @@
 %token IF
 %token LEN NTH ALLOC
 %token LET EQUAL IN
+%token FST SND
 %token <int> NUM
 %token <string> IDENT
 %token <string> TVAR
@@ -84,6 +85,7 @@ eType:
   | LPAR VEC eType RPAR { Vec($3) }
   | LPAR eTypes ARROW eType RPAR { Fun ($2, $4) }
   | TVAR { TypeVar($1) }
+  | LPAR eType STAR eType RPAR { Product($2, $4) }
 ;;
 
 eTypes:
@@ -113,6 +115,8 @@ expr:
   | LBRACKET args RBRACKET expr { Abs($2, $4) }
   | LPAR expr exprs RPAR { App($2, $3) }
   | LPAR LET IDENT EQUAL expr IN expr RPAR { Let($3, $5, $7) }
+  | LPAR expr COMMA expr RPAR { Pair($2, $4) }
+  | expr DOT FST { Fst($1) } | expr DOT SND { Snd($1) }
 ;;
 
 exprs:
