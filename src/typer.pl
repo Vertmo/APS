@@ -33,6 +33,9 @@ find_type_vars([vec(T)|Ts], Vs) :-
 find_type_vars([tprod(T1, T2)|Ts], Vs) :-
     find_type_vars([T1], Vs1), find_type_vars([T2], Vs2), find_type_vars(Ts, Vs3),
     append(Vs1, Vs2, Vs4), append(Vs3, Vs4, Vs).
+find_type_vars([tsum(T1, T2)|Ts], Vs) :-
+    find_type_vars([T1], Vs1), find_type_vars([T2], Vs2), find_type_vars(Ts, Vs3),
+    append(Vs1, Vs2, Vs4), append(Vs3, Vs4, Vs).
 find_type_vars([tfun(Tin, To)|Ts], Vs) :-
     find_type_vars(Tin, Vs1), find_type_vars([To], Vs2), find_type_vars(Ts, Vs3),
     append(Vs1, Vs2, Vs4), append(Vs3, Vs4, Vs).
@@ -62,6 +65,8 @@ deforallize(S, [vec(T)|Ts], [To|Tso]) :-
     deforallize(S, T, To), deforallize(S, Ts, Tso).
 deforallize(S, [tprod(T1, T2)|Ts], [tprod(T1o, T2o)|Tso]) :-
     deforallize(S, T1, T1o), deforallize(T2, T2o), deforallize(S, Ts, Tso).
+deforallize(S, [tsum(T1, T2)|Ts], [tsum(T1o, T2o)|Tso]) :-
+    deforallize(S, T1, T1o), deforallize(T2, T2o), deforallize(S, Ts, Tso).
 deforallize(S, [tfun(Fti, Fto)|Ts], [tfun(Ftio, Ftoo)|Tso]) :-
     deforallize(S, Fti, Ftio), deforallize(S, Fto, Ftoo), deforallize(S, Ts, Tso).
 deforallize(S, [T|Ts], [To|Tso]) :-
@@ -79,6 +84,9 @@ substitute([vec(Ti)|Gi], T1, T2, [vec(To)|Go]) :- !,
 substitute([tprod(T1i, T2i)|Gi], T1, T2, [tprod(T1o, T2o)|Go]) :- !,
     substitute([T1i], T1, T2, [T1o]), substitute([T2i], T1, T2, [T2o]),
     substitute(Gi, T1, T2, Go).
+substitute([tsum(T1i, T2i)|Gi], T1, T2, [tsum(T1o, T2o)|Go]) :- !,
+    substitute([T1i], T1, T2, [T1o]), substitute([T2i], T1, T2, [T2o]),
+    substitute(Gi, T1, T2, Go).
 substitute([tfun(Ftii, Ftio)|Gi], T1, T2, [tfun(Ftoi, Ftoo)|Go]) :- !,
     substitute(Ftii, T1, T2, Ftio), substitute([Ftoi], T1, T2, [Ftoo]),
     substitute(Gi, T1, T2, Go).
@@ -91,6 +99,8 @@ uni_delete(Si, [T|G1], [T|G2], So) :- !, unify(Si, G1, G2, So).
 uni_decompose(Si, [vec(T1)|G1], [vec(T2)|G2], So) :-
     unify(Si, [T1], [T2], Se), unify(Se, G1, G2, So).
 uni_decompose(Si, [tprod(T1, T2)|G1], [tprod(T1o, T2o)|G2], So) :-
+    unify(Si, [T1], [T1o], S1), unify(S1, [T2], [T2o], S2), unify(S2, G1, G2, So).
+uni_decompose(Si, [tsum(T1, T2)|G1], [tsum(T1o, T2o)|G2], So) :-
     unify(Si, [T1], [T1o], S1), unify(S1, [T2], [T2o], S2), unify(S2, G1, G2, So).
 uni_decompose(Si, [tfun(Fti1, Fto1)|G1], [tfun(Fti2, Fto2)|G2], So) :-
     unify(Si, Fti1, Fti2, S1), unify(S1, [Fto1], [Fto2], S2),
@@ -226,6 +236,12 @@ check_expr_type(Env, pair(E1, E2), tprod(T1, T2)) :-
     check_expr_type(Env, E1, T1), check_expr_type(Env, E2, T2).
 check_expr_type(Env, fst(E), T) :- check_expr_type(Env, E, tprod(T, _)).
 check_expr_type(Env, snd(E), T) :- check_expr_type(Env, E, tprod(_, T)).
+% Sum types
+check_expr_type(Env, inl(T2, E1), tsum(T1, T2)) :- check_expr_type(Env, E1, T1).
+check_expr_type(Env, inr(T1, E2), tsum(T1, T2)) :- check_expr_type(Env, E2, T2).
+check_expr_type(Env, case(E, S1, E1, S2, E2), T) :-
+    check_expr_type(Env, E, tsum(T1, T2)),
+    check_expr_type([S1:T1|Env], E1, T), check_expr_type([S2:T2|Env], E2, T).
 
 %% Check type for a set of expressions
 check_expr_types(_, [], []).

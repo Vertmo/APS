@@ -112,6 +112,7 @@ let rec eval_expr (env, mem, outFlow) = function
   | Abs (a, e) -> Closure (e, (fun args -> (List.combine (fst (List.split a)) args)@env)), mem, outFlow
   | Let (x, e, b) -> let (v, mem', outFlow') = eval_expr (env, mem, outFlow) e in
     eval_expr ((x,v)::env, mem', outFlow') b
+  (* Pairs *)
   | Pair (e1, e2) ->
     let (v1, mem', outFlow') = eval_expr (env, mem, outFlow) e1 in
     let (v2, mem', outFlow') = eval_expr (env, mem', outFlow') e2 in ((PairVal (v1, v2)), mem', outFlow')
@@ -123,6 +124,7 @@ let rec eval_expr (env, mem, outFlow) = function
     let (v, mem', outFlow') = eval_expr (env, mem, outFlow) e in (match v with
         | PairVal (_, v2) -> (v2, mem', outFlow')
         | _ -> failwith "Fst: Should not happen")
+(* Sum types (TODO) *)
 
 (** Evaluate a declaration *)
 and eval_dec (env, mem, outFlow) = function

@@ -1,0 +1,4 @@
+[
+  CONST i (bool + int) (inr bool 42);
+  ECHO (case i of inl b => 0 | inr n => n)
+]

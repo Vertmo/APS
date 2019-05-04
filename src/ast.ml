@@ -3,6 +3,7 @@ type eType = Int | Bool | Void
            | Fun of (eType list * eType)
            | TypeVar of string
            | Product of (eType * eType)
+           | Sum of (eType * eType)
 
 let rec string_of_type = function
   | Int -> "int" | Bool -> "bool" | Void -> "void"
@@ -10,6 +11,7 @@ let rec string_of_type = function
   | Fun (l, t) -> Printf.sprintf "(%s -> %s)" (String.concat "*" (List.map string_of_type l)) (string_of_type t)
   | TypeVar s -> s
   | Product (t1, t2) -> Printf.sprintf "(%s * %s)" (string_of_type t1) (string_of_type t2)
+  | Sum (t1, t2) -> Printf.sprintf "(%s + %s)" (string_of_type t1) (string_of_type t2)
 
 type opPrim = Not | And | Or | Eq | Lt | Add | Sub | Mul | Div | Len | Nth | Alloc
 
@@ -32,6 +34,8 @@ type expr =
   | App of expr * expr list
   | Let of string * expr * expr
   | Pair of expr * expr | Fst of expr | Snd of expr
+  | InL of eType * expr | InR of eType * expr
+  | Case of expr * string * expr * string * expr
 
 and dec =
   | ConstDec of string * eType * expr
@@ -69,6 +73,10 @@ let rec string_of_expr = function
   | Let (x, e, b) -> Printf.sprintf "let %s = %s in %s" x (string_of_expr e) (string_of_expr b)
   | Pair (e1, e2) -> Printf.sprintf "(%s, %s)" (string_of_expr e1) (string_of_expr e2)
   | Fst e -> Printf.sprintf "%s.fst" (string_of_expr e) | Snd e -> Printf.sprintf "%s.fst" (string_of_expr e)
+  | InL (t, e) -> Printf.sprintf "(inl %s %s)" (string_of_type t) (string_of_expr e)
+  | InR (t, e) -> Printf.sprintf "(inr %s %s)" (string_of_type t) (string_of_expr e)
+  | Case (e, s1, e1, s2, e2) -> Printf.sprintf "(case %s of\n %s => %s\n | %s => %s)"
+                                  (string_of_expr e) s1 (string_of_expr e1) s2 (string_of_expr e2)
 
 and string_of_dec = function
   | ConstDec (x, t, e) -> Printf.sprintf "CONST %s %s %s" x (string_of_type t) (string_of_expr e)

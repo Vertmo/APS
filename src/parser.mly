@@ -6,7 +6,7 @@
 %token LPAR RPAR
 %token SEMICOL PPOINT
 %token COMMA DOT
-%token STAR
+%token STAR PLUS
 %token ARROW
 %token CONST FUN REC
 %token ECHO
@@ -20,6 +20,8 @@
 %token LEN NTH ALLOC
 %token LET EQUAL IN
 %token FST SND
+%token INL INR
+%token CASE OF DARROW PIPE
 %token <int> NUM
 %token <string> IDENT
 %token <string> TVAR
@@ -86,6 +88,7 @@ eType:
   | LPAR eTypes ARROW eType RPAR { Fun ($2, $4) }
   | TVAR { TypeVar($1) }
   | LPAR eType STAR eType RPAR { Product($2, $4) }
+  | LPAR eType PLUS eType RPAR { Sum($2, $4) }
 ;;
 
 eTypes:
@@ -117,6 +120,9 @@ expr:
   | LPAR LET IDENT EQUAL expr IN expr RPAR { Let($3, $5, $7) }
   | LPAR expr COMMA expr RPAR { Pair($2, $4) }
   | expr DOT FST { Fst($1) } | expr DOT SND { Snd($1) }
+  | LPAR INL eType expr RPAR { InL($3, $4) } | LPAR INR eType expr RPAR { InR($3, $4) }
+  | LPAR CASE expr OF INL IDENT DARROW expr PIPE INR IDENT DARROW expr RPAR
+      { Case($3, $6, $8, $11, $13) }
 ;;
 
 exprs:
