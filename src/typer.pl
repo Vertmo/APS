@@ -11,11 +11,24 @@ build_basic_env(["true":bool,"false":bool,
 
 %% Find type in the environment
 check_in_env([S:T|_], S, T).
-check_in_env([_|EnvS], S, T) :- check_in_env(EnvS, S, T).
+check_in_env([S1:_|EnvS], S, T) :- S1 \== S, check_in_env(EnvS, S, T).
+check_in_env([_=_|EnvS], S, T) :- check_in_env(EnvS, S, T).
 
 %% Get only the types of a sym/type pair list (env)
 get_types_of_env([], []).
 get_types_of_env([_:T|EnvS], [T|TypeS]) :- get_types_of_env(EnvS, TypeS).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Types déclarés
+
+%% Find type alias in the environment
+find_type_in_env([S=T|_], S, T).
+find_type_in_env([_|EnvS], S, T) :- find_type_in_env(EnvS, S, T).
+
+%% Check if a type is defined as another
+equiv_type(_, Ti, To) :- forallize(Ti, To).
+equiv_type(Env, tudef(S), T) :- find_type_in_env(Env, S, T).
+equiv_type(Env, T, tudef(S)) :- find_type_in_env(Env, S, T).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% List to set
@@ -159,14 +172,14 @@ check_cmds_type(E, [return(R)], E, T) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Check a declaration
-check_dec_type(Env, const(X, Ti, E), [X:T|Env]) :-
-    forallize(Ti, T), check_expr_type(Env, E, T).
-check_dec_type(Env, fun(X, Touti, Args, Body), [X:T|Env]) :-
-    forallize(Touti, Tout),
+check_dec_type(Env, const(X, Ts, E), [X:Ti|Env]) :-
+    forallize(Ts, Ti), check_expr_type(Env, E, T), equiv_type(Env, T, Ti).
+check_dec_type(Env, fun(X, Touts, Args, Body), [X:T|Env]) :-
+    equiv_type(Env, Touts, Tout),
     get_types_of_env(Args, Tin), forallize(tfun(Tin, Tout), T),
     append(Args, Env, NEnv), check_expr_type(NEnv, Body, Tout).
-check_dec_type(Env, funrec(X, Touti, Args, Body), [X:T|Env]) :-
-    forallize(Touti, Tout),
+check_dec_type(Env, funrec(X, Touts, Args, Body), [X:T|Env]) :-
+    equiv_type(Env, Touts, Tout),
     get_types_of_env(Args, Tin), forallize(tfun(Tin, Tout), T),
     append([X:T|Args], Env, NEnv), check_expr_type(NEnv, Body, Tout).
 check_dec_type(Env, var(X, Ti), [X:T|Env]) :- forallize(Ti, T).
@@ -176,14 +189,15 @@ check_dec_type(Env, proc(X, Args, Body), [X:T|Env]) :-
 check_dec_type(Env, procrec(X, Args, Body), [X:T|Env]) :-
     get_types_of_env(Args, Tin), forallize(tfun(Tin, void), T),
     append([X:T|Args], Env, NEnv), check_cmds_type(NEnv, Body, _, void).
-check_dec_type(Env, funproc(X, Touti, Args, Body), [X:T|Env]) :-
-    forallize(Touti, Tout),
+check_dec_type(Env, funproc(X, Touts, Args, Body), [X:T|Env]) :-
+    equiv_type(Env, Touts, Tout),
     get_types_of_env(Args, Tin), forallize(tfun(Tin, Tout), T),
     append(Args, Env, NEnv), check_cmds_type(NEnv, Body, _, Tout).
-check_dec_type(Env, funprocrec(X, Touti, Args, Body), [X:T|Env]) :-
-    forallize(Touti, Tout),
+check_dec_type(Env, funprocrec(X, Touts, Args, Body), [X:T|Env]) :-
+    equiv_type(Env, Touts, Tout),
     get_types_of_env(Args, Tin), forallize(tfun(Tin, Tout), T),
     append([X:T|Args], Env, NEnv), check_cmds_type(NEnv, Body, _, Tout).
+check_dec_type(Env, typedec(X, T), [X=T|Env]). %% This is more than a little hacky...
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Check a statement
@@ -221,7 +235,7 @@ check_expr_type(Env, abs(Args, Body), T) :-
     forallize(tfun(Tin, Tout), forall(_, Ti)), unify([], Ti, T, _).
 check_expr_type(Env, if(Cond, Then, Else), T) :-
     check_expr_type(Env, Cond, bool),
-    check_expr_type(Env, Then, T), check_expr_type(Env, Else, T).
+    check_expr_type(Env, Then, T1), check_expr_type(Env, Else, T2).
 check_expr_type(Env, app(sym("alloc"), [E]), vec(_)) :- check_expr_type(Env, E, int).
 check_expr_type(Env, app(sym("nth"), [E1,E2]), T) :-
     check_expr_type(Env, E1, vec(T)), check_expr_type(Env, E2, int).
@@ -243,7 +257,12 @@ check_expr_type(Env, case(E, S1, E1, S2, E2), T) :-
     check_expr_type(Env, E, tsum(T1, T2)),
     check_expr_type([S1:T1|Env], E1, T), check_expr_type([S2:T2|Env], E2, T).
 %% Unit
-check_expr_type(Env, unit, tunit).
+check_expr_type(_, unit, tunit).
+
+%% Named types
+check_expr_type(Env, E, T1) :-
+    T1 \= tudef(S2), equiv_type(Env, tudef(S2), T1),
+    check_expr_type(Env, E, tudef(S2)).
 
 %% Check type for a set of expressions
 check_expr_types(_, [], []).
@@ -255,9 +274,11 @@ check_app_type(_, tfun([], Tout), [], Tout).
 check_app_type(Env, tfun([Ft|Fts], Tout), [E|Es], RTout) :-
     check_expr_type(Env, E, Ftt), unify([], [Ftt], [Ft], _),
     check_app_type(Env, tfun(Fts, Tout), Es, RTout).
+check_app_type(Env, tfun([Ft|Fts], Tout), [E|Es], RTout) :-
+    check_expr_type(Env, E, Ftt), equiv_type(Env, Ft, Ftt),
+    check_app_type(Env, tfun(Fts, Tout), Es, RTout).
 
 % Check a polymorphic function application
 check_app_type(Env, forall(_, tfun(Ti, To)), E, RTo) :-
     check_expr_types(Env, E, Et), unify([], Ti, Et, Subs),
     deforallize(Subs, [To], [RTo]).
-

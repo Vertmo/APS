@@ -4,6 +4,7 @@ type eType = Int | Bool | Void | Unit
            | TypeVar of string
            | Product of (eType * eType)
            | Sum of (eType * eType)
+           | UDefined of string
 
 let rec string_of_type = function
   | Int -> "int" | Bool -> "bool" | Void -> "void"
@@ -13,6 +14,7 @@ let rec string_of_type = function
   | Product (t1, t2) -> Printf.sprintf "(%s * %s)" (string_of_type t1) (string_of_type t2)
   | Sum (t1, t2) -> Printf.sprintf "(%s + %s)" (string_of_type t1) (string_of_type t2)
   | Unit -> "unit"
+  | UDefined s -> s
 
 type opPrim = Not | And | Or | Eq | Lt | Add | Sub | Mul | Div | Len | Nth | Alloc
 
@@ -48,6 +50,7 @@ and dec =
   | RecProcDec of string * arg list * prog
   | FunProcDec of string * eType * arg list * prog
   | RecFunProcDec of string * eType * arg list * prog
+  | TypeDec of string * eType
 
 and lval = SymLval of string | Nth of lval * expr
 
@@ -100,6 +103,7 @@ and string_of_dec = function
                                  x (string_of_type t) (string_of_args a) (string_of_prog p)
   | RecFunProcDec (x, t, a, p) -> Printf.sprintf "REC FUN %s %s [%s]\n%s"
                                  x (string_of_type t) (string_of_args a) (string_of_prog p)
+  | TypeDec (s, t) -> Printf.sprintf "TYPE %s %s" s (string_of_type t)
 
 and string_of_lval = function
   | SymLval s -> s

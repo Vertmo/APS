@@ -25,6 +25,7 @@
 %token <int> NUM
 %token <string> IDENT
 %token <string> TVAR
+%token TYPE
 %token EOF
 
 %start<Ast.prog> main;;
@@ -63,6 +64,7 @@ dec:
   | PROC REC IDENT LBRACKET args RBRACKET prog { RecProcDec($3, $5, $7) }
   | FUN IDENT eType LBRACKET args RBRACKET LBRACKET cmds RBRACKET { FunProcDec($2, $3, $5, $8) }
   | FUN REC IDENT eType LBRACKET args RBRACKET LBRACKET cmds RBRACKET { RecFunProcDec($3, $4, $6, $9) }
+  | TYPE IDENT eType { TypeDec($2, $3) }
 ;;
 
 stat:
@@ -89,6 +91,7 @@ eType:
   | TVAR { TypeVar($1) }
   | LPAR eType STAR eType RPAR { Product($2, $4) }
   | LPAR eType PLUS eType RPAR { Sum($2, $4) }
+  | IDENT { UDefined($1) }
 ;;
 
 eTypes:

@@ -1,0 +1,4 @@
+[
+  TYPE empty empty;
+  ECHO 42
+]

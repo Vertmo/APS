@@ -1,0 +1,22 @@
+[
+  TYPE intopt (int + unit);
+  TYPE intlist (unit + (int * intlist));
+  CONST nil intlist (inl (int * intlist) ());
+  FUN cons intlist [t:int, l:intlist] (inr unit (t,l));
+
+  CONST l intlist (cons 12 (cons 3 (cons 7 (cons 42 (cons 4 (cons 9 nil))))));
+
+  FUN REC length int [l:intlist] (
+    case l of inl nil => 0
+            | inr p => (add 1 (length p.snd))
+  );
+
+  ECHO (length l);
+
+  FUN REC nthopt intopt [l:intlist, n:int] (
+    case l of inl nil => (inr int ())
+            | inr p => (if (eq n 0) (inl unit p.fst) (nthopt p.snd (sub n 1)))
+  );
+
+  ECHO (case (nthopt l 3) of inl n => n | inr none => -1)
+]

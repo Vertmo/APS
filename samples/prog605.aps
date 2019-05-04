@@ -1,0 +1,5 @@
+[
+  TYPE intoption (int + unit);
+  CONST o intoption (inl unit 42);
+  ECHO (case o of inl n => n | inr u => 0)
+]

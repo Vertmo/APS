@@ -10,6 +10,7 @@ let rec prolog_of_type = function
   | Product (t1, t2) -> Printf.sprintf "tprod(%s, %s)" (prolog_of_type t1) (prolog_of_type t2)
   | Sum (t1, t2) -> Printf.sprintf "tsum(%s, %s)" (prolog_of_type t1) (prolog_of_type t2)
   | Unit -> "tunit"
+  | UDefined s -> Printf.sprintf "tudef(\"%s\")" s
 
 let prolog_of_args a = (String.concat "," (List.map (fun (s, t) -> Printf.sprintf "\"%s\":%s" s (prolog_of_type t)) a))
 
@@ -58,7 +59,8 @@ and prolog_of_dec = function
                                 x
                                 (prolog_of_type t)
                                 (prolog_of_args a)
-                                (prolog_of_prog b)
+                                 (prolog_of_prog b)
+  | TypeDec (x, t) -> Printf.sprintf "typedec(\"%s\", %s)" x (prolog_of_type t)
 
 and prolog_of_lval = function
   | SymLval s -> Printf.sprintf "sym(\"%s\")" s

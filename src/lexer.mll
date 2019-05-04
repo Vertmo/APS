@@ -26,6 +26,7 @@ rule token = parse
   | "fst" { FST } | "snd" { SND }
   | "inl" { INL } | "inr" { INR }
   | "case" { CASE } | "of" { OF } | "=>" { DARROW } | '|' { PIPE }
+  | "TYPE" { TYPE }
   | ('-'?)['0'-'9']+ { NUM (int_of_string(Lexing.lexeme lexbuf)) }
   | '\''['a'-'z']+ { let s = (Lexing.lexeme lexbuf) in
                      TVAR (String.sub s 1 ((String.length s)-1)) }

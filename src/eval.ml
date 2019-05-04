@@ -160,6 +160,7 @@ and eval_dec (env, mem, outFlow) = function
     let rpc = RecProcClosure (fun p ->
         (b, fun args -> (x, p)::(List.combine (fst (List.split a)) args)@env)) in
     ((x, rpc)::env, mem, outFlow)
+  | TypeDec _ -> (env, mem, outFlow) (* This doesn't do anything ^^ *)
 
 (** Evaluate an left value *)
 and eval_lval (env, mem, outFlow) = function
