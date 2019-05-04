@@ -1,5 +1,5 @@
 [
   FUN f int [x:(int -> int), y:int] (x y);
   FUN g int [z: 'b] 42;
-  ECHO (f [z: 'b] 42 42)
+  ECHO (f g 42)
 ]
