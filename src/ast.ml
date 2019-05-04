@@ -1,4 +1,4 @@
-type eType = Int | Bool | Void
+type eType = Int | Bool | Void | Unit
            | Vec of eType
            | Fun of (eType list * eType)
            | TypeVar of string
@@ -12,6 +12,7 @@ let rec string_of_type = function
   | TypeVar s -> s
   | Product (t1, t2) -> Printf.sprintf "(%s * %s)" (string_of_type t1) (string_of_type t2)
   | Sum (t1, t2) -> Printf.sprintf "(%s + %s)" (string_of_type t1) (string_of_type t2)
+  | Unit -> "unit"
 
 type opPrim = Not | And | Or | Eq | Lt | Add | Sub | Mul | Div | Len | Nth | Alloc
 
@@ -36,6 +37,7 @@ type expr =
   | Pair of expr * expr | Fst of expr | Snd of expr
   | InL of eType * expr | InR of eType * expr
   | Case of expr * string * expr * string * expr
+  | Unit
 
 and dec =
   | ConstDec of string * eType * expr
@@ -77,6 +79,7 @@ let rec string_of_expr = function
   | InR (t, e) -> Printf.sprintf "(inr %s %s)" (string_of_type t) (string_of_expr e)
   | Case (e, s1, e1, s2, e2) -> Printf.sprintf "(case %s of\n %s => %s\n | %s => %s)"
                                   (string_of_expr e) s1 (string_of_expr e1) s2 (string_of_expr e2)
+  | Unit -> "()"
 
 and string_of_dec = function
   | ConstDec (x, t, e) -> Printf.sprintf "CONST %s %s %s" x (string_of_type t) (string_of_expr e)

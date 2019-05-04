@@ -242,6 +242,8 @@ check_expr_type(Env, inr(T1, E2), tsum(T1, T2)) :- check_expr_type(Env, E2, T2).
 check_expr_type(Env, case(E, S1, E1, S2, E2), T) :-
     check_expr_type(Env, E, tsum(T1, T2)),
     check_expr_type([S1:T1|Env], E1, T), check_expr_type([S2:T2|Env], E2, T).
+%% Unit
+check_expr_type(Env, unit, tunit).
 
 %% Check type for a set of expressions
 check_expr_types(_, [], []).

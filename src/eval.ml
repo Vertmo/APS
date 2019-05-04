@@ -3,7 +3,7 @@ open Ast
 type value = IntVal of int | Closure of closure | RecClosure of recclosure
            | Addr of int | ProcClosure of procclosure | RecProcClosure of recprocclosure
            | Block of int * int
-           | PairVal of value * value | InL of value | InR of value
+           | PairVal of value * value | InL of value | InR of value | Unit
 and closure = (expr * (value list -> env))
 and recclosure = value -> closure
 and procclosure = (cmd list * (value list -> env))
@@ -133,6 +133,8 @@ let rec eval_expr (env, mem, outFlow) = function
      | InL v -> eval_expr ((x1, v)::env, mem', outFlow') e1
      | InR v -> eval_expr ((x2, v)::env, mem', outFlow') e2
      | _ -> failwith "Case: Should not happen")
+    (* Unit *)
+  | Unit -> (Unit, mem, outFlow)
 
 (** Evaluate a declaration *)
 and eval_dec (env, mem, outFlow) = function

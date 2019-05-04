@@ -14,7 +14,7 @@ rule token = parse
   | "VAR" { VAR } | "SET" { SET }
   | "PROC" { PROC } | "CALL" { CALL }
   | "IF" { IFS } | "WHILE" { WHILE }
-  | "int" { INT } | "bool" { BOOL } | "void" { VOID } | "vec" { VEC }
+  | "int" { INT } | "bool" { BOOL } | "void" { VOID } | "vec" { VEC } | "unit" { UNIT } | "()" { PARPAR }
   | "true" { TRUE } | "false" { FALSE }
   | "not" { NOT } | "and" { AND } | "or" { OR }
   | "eq" { EQ } | "lt" { LT }

@@ -1,0 +1,4 @@
+[
+  CONST u unit ();
+  ECHO 42
+]

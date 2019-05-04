@@ -11,7 +11,7 @@
 %token CONST FUN REC
 %token ECHO
 %token VAR SET PROC CALL IFS WHILE RETURN
-%token INT BOOL VOID VEC
+%token INT BOOL VOID VEC UNIT PARPAR
 %token TRUE FALSE
 %token NOT AND OR
 %token EQ LT
@@ -83,7 +83,7 @@ lval:
 eType:
   | INT { Int }
   | BOOL { Bool }
-  | VOID { Void }
+  | VOID { Void } | UNIT { Unit }
   | LPAR VEC eType RPAR { Vec($3) }
   | LPAR eTypes ARROW eType RPAR { Fun ($2, $4) }
   | TVAR { TypeVar($1) }
@@ -123,6 +123,7 @@ expr:
   | LPAR INL eType expr RPAR { InL($3, $4) } | LPAR INR eType expr RPAR { InR($3, $4) }
   | LPAR CASE expr OF INL IDENT DARROW expr PIPE INR IDENT DARROW expr RPAR
       { Case($3, $6, $8, $11, $13) }
+  | PARPAR { Unit }
 ;;
 
 exprs:
