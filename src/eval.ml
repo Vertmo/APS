@@ -182,6 +182,7 @@ and eval_lval (env, mem, outFlow) = function
 and eval_stat (env, mem, outFlow) = function
   | Echo e -> (match (eval_expr (env, mem, outFlow) e) with (IntVal i, mem', outFlow') -> Empty, mem', (i::outFlow')
                                                  | _ -> failwith "Echo: Should not happen")
+  | Ignore e -> let (_, mem', outFlow') = eval_expr (env, mem, outFlow) e in (Empty, mem', outFlow')
   | Set (x, e) -> let (v, mem', outFlow') = eval_expr (env, mem, outFlow) e in
     let (a, mem'', outFlow'') = eval_lval (env, mem', outFlow') x in (match a with
       | Addr a -> mem''.(a) <- Some v; (Empty, mem'', outFlow'')

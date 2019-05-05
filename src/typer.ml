@@ -68,6 +68,7 @@ and prolog_of_lval = function
 
 and prolog_of_stat = function
   | Echo e -> Printf.sprintf "echo(%s)" (prolog_of_expr e)
+  | Ignore e -> Printf.sprintf "ignore(%s)" (prolog_of_expr e)
   | Set (x, e) -> Printf.sprintf "set(%s, %s)" (prolog_of_lval x) (prolog_of_expr e)
   | Ifs (c, t, e) -> Printf.sprintf "ifs(%s, %s, %s)" (prolog_of_expr c) (prolog_of_prog t) (prolog_of_prog e)
   | While (c, b) -> Printf.sprintf "while(%s, %s)" (prolog_of_expr c) (prolog_of_prog b)

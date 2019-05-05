@@ -55,7 +55,7 @@ and dec =
 and lval = SymLval of string | Nth of lval * expr
 
 and stat =
-  | Echo of expr
+  | Echo of expr | Ignore of expr
   | Set of lval * expr
   | Ifs of expr * prog * prog
   | While of expr * prog
@@ -111,6 +111,7 @@ and string_of_lval = function
 
 and string_of_stat = function
   | Echo e -> Printf.sprintf "ECHO %s" (string_of_expr e)
+  | Ignore e -> Printf.sprintf "IGNORE %s" (string_of_expr e)
   | Set (x, e) -> Printf.sprintf "SET %s %s" (string_of_lval x) (string_of_expr e)
   | Ifs (c, t, e) -> Printf.sprintf "IF %s\n%s\n%s" (string_of_expr c) (string_of_prog t) (string_of_prog e)
   | While (c, b) -> Printf.sprintf "WHILE %s\n%s" (string_of_expr c) (string_of_prog b)

@@ -10,7 +10,7 @@ rule token = parse
   | ';' { SEMICOL } | ':' { PPOINT } | ',' { COMMA } | '.' { DOT }
   | '*' { STAR } | "->" { ARROW } | "+" { PLUS }
   | "CONST" { CONST } | "FUN" { FUN } | "REC" { REC }
-  | "ECHO" { ECHO }
+  | "ECHO" { ECHO } | "IGNORE" { IGNORE }
   | "VAR" { VAR } | "SET" { SET }
   | "PROC" { PROC } | "CALL" { CALL }
   | "IF" { IFS } | "WHILE" { WHILE }

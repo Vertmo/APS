@@ -9,7 +9,7 @@
 %token STAR PLUS
 %token ARROW
 %token CONST FUN REC
-%token ECHO
+%token ECHO IGNORE
 %token VAR SET PROC CALL IFS WHILE RETURN
 %token INT BOOL VOID VEC UNIT PARPAR
 %token TRUE FALSE
@@ -69,6 +69,7 @@ dec:
 
 stat:
   | ECHO expr { Echo $2 }
+  | IGNORE expr { Ignore $2 }
   | SET lval expr { Set ($2, $3) }
   | IFS expr prog prog { Ifs($2, $3, $4) }
   | WHILE expr prog { While($2, $3) }

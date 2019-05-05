@@ -1,0 +1,4 @@
+[
+  FUN echo unit [x:int] [ ECHO x; RETURN () ];
+  IGNORE (echo 42)
+]

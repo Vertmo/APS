@@ -202,6 +202,7 @@ check_dec_type(Env, typedec(X, T), [X=T|Env]). %% This is more than a little hac
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Check a statement
 check_stat_type(Env, echo(E), void) :- check_expr_type(Env, E, int).
+check_stat_type(Env, ignore(E), void) :- check_expr_type(Env, E, _).
 check_stat_type(Env, set(X, E), void) :-
     check_expr_type(Env, X, T), check_expr_type(Env, E, T).
 check_stat_type(Env, ifs(E, Then, Else), T) :-
