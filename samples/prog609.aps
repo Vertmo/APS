@@ -1,0 +1,37 @@
+[
+  TYPE arb (unit + (int * (arb * arb)));
+  CONST feuille arb (inl (int * (arb * arb)) ());
+  FUN noeud arb [t:int, l:arb, r:arb] (inr unit (t,(l,r)));
+
+  FUN REC inserer arb [v:int, a:arb] (
+    case a of inl nil => (noeud v feuille feuille)
+            | inr p => (if (eq v p.fst) a
+                         (if (lt v p.fst)
+                           (noeud p.fst (inserer v p.snd.fst) p.snd.snd)
+                           (noeud p.fst p.snd.fst (inserer v p.snd.snd))))
+  );
+
+  CONST arbre arb (inserer 13 (inserer 2 (inserer 42 (inserer 82 (inserer 7 (inserer 8 (inserer 13 (inserer 54 feuille))))))));
+
+  FUN REC rechercher bool [a:arb, v:int] (
+    case a of inl nil => false
+            | inr p => (if (eq v p.fst) true
+                         (if (lt v p.fst)
+                           (rechercher p.snd.fst v)
+                           (rechercher p.snd.snd v)))
+  );
+
+
+  FUN REC prefixe unit [a:arb] [
+    IF (case a of inl feuille => true | inr no => false) [ RETURN () ] [
+      IGNORE (case a of inl feuille => () | inr no => (prefixe no.snd.fst));
+      ECHO (case a of inl feuille => 0 | inr no => no.fst);
+      IGNORE (case a of inl feuille => () | inr no => (prefixe no.snd.snd))
+    ];
+    RETURN ()
+  ];
+
+  ECHO (if (rechercher arbre 41) 1 0);
+  ECHO (if (rechercher arbre 42) 1 0);
+  IGNORE (prefixe arbre)
+]
