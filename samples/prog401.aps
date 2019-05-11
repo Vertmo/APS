@@ -3,5 +3,5 @@
       ECHO x;
       RETURN (add x 1)
   ];
-  ECHO (LET x = (f 40) IN (f x))
+  ECHO (let x = (f 40) in (f x))
 ]

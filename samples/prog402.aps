@@ -8,6 +8,6 @@
     ];
     RETURN v
   ];
-  FUN f bool [x:int] (LET v = (alloc 2) IN (nth (setTrue 2 v) 1));
+  FUN f bool [x:int] (let v = (alloc 2) in (nth (setTrue 2 v) 1));
   IF (f 0) [ ECHO 1 ] [ ECHO 0 ]
 ]

@@ -1,8 +1,0 @@
-(ocamllex lexer)
-
-(menhir (modules parser))
-
-(executable
-  (name aps)
-  (link_deps typer.pl)
-  (flags :standard -w -39))

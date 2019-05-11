@@ -22,7 +22,7 @@ rule token = parse
   | "if" { IF }
   | "len" { LEN } | "nth" { NTH } | "alloc" { ALLOC }
   | "RETURN" { RETURN }
-  | "LET" { LET } | '=' { EQUAL } | "IN" { IN }
+  | "let" { LET } | '=' { EQUAL } | "in" { IN }
   | "fst" { FST } | "snd" { SND }
   | "inl" { INL } | "inr" { INR }
   | "case" { CASE } | "of" { OF } | "=>" { DARROW } | '|' { PIPE }

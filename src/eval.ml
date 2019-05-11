@@ -116,7 +116,7 @@ let rec eval_expr (env, mem, outFlow) = function
   (* Pairs *)
   | Pair (e1, e2) ->
     let (v1, mem', outFlow') = eval_expr (env, mem, outFlow) e1 in
-    let (v2, mem', outFlow') = eval_expr (env, mem', outFlow') e2 in ((PairVal (v1, v2)), mem', outFlow')
+    let (v2, mem'', outFlow'') = eval_expr (env, mem', outFlow') e2 in ((PairVal (v1, v2)), mem'', outFlow'')
   | Fst e ->
     let (v, mem', outFlow') = eval_expr (env, mem, outFlow) e in (match v with
     | PairVal (v1, _) -> (v1, mem', outFlow')
